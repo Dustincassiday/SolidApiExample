@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using SolidApiExample.Application.Contracts;
+using SolidApiExample.Application.Orders;
 using SolidApiExample.Application.Orders.Shared;
 using SolidApiExample.Application.Repositories;
 using SolidApiExample.Application.Shared;
@@ -13,6 +14,9 @@ public sealed class ListOrders : IListItems<OrderDto>
 
     public ListOrders(IOrdersRepo repo) => _repo = repo;
 
-    public Task<Paged<OrderDto>> ListAsync(int page, int size, CancellationToken ct = default) =>
-        _repo.ListAsync(page, size, ct);
+    public async Task<Paged<OrderDto>> ListAsync(int page, int size, CancellationToken ct = default)
+    {
+        var orders = await _repo.ListAsync(page, size, ct);
+        return orders.ToDto();
+    }
 }

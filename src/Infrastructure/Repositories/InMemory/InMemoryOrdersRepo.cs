@@ -1,20 +1,25 @@
-using SolidApiExample.Application.Orders.CreateOrder;
-using SolidApiExample.Application.Orders.Shared;
-using SolidApiExample.Application.Orders.UpdateOrder;
 using SolidApiExample.Application.Repositories;
 using SolidApiExample.Application.Shared;
+using SolidApiExample.Domain.Orders;
 
 namespace SolidApiExample.Infrastructure.Repositories.InMemory;
 
 public sealed class InMemoryOrdersRepo : IOrdersRepo
 {
-    private readonly List<OrderDto> _orders = new();
-    public Task<OrderDto?> FindAsync(Guid id, CancellationToken ct) =>
+    private readonly List<Order> _orders = new();
+
+    public Task<Order?> FindAsync(Guid id, CancellationToken ct) =>
         Task.FromResult(_orders.FirstOrDefault(o => o.Id == id));
-    public Task<Paged<OrderDto>> ListAsync(int page, int size, CancellationToken ct)
+
+    public Task<Paged<Order>> ListAsync(int page, int size, CancellationToken ct)
     {
-        var items = _orders.Skip(page * size).Take(size).ToList();
-        return Task.FromResult(new Paged<OrderDto>
+        var items = _orders
+            .Skip(page * size)
+            .Take(size)
+            .Select(o => Order.FromExisting(o.Id, o.PersonId, o.Status))
+            .ToList();
+
+        return Task.FromResult(new Paged<Order>
         {
             Items = items,
             Page = page,
@@ -22,14 +27,18 @@ public sealed class InMemoryOrdersRepo : IOrdersRepo
             Total = _orders.Count
         });
     }
-    public Task<OrderDto> AddAsync(CreateOrderDto dto, CancellationToken ct)
+
+    public Task<Order> AddAsync(Order order, CancellationToken ct)
     {
-        var o = new OrderDto { Id = Guid.NewGuid(), PersonId = dto.PersonId, Status = dto.Status };
-        _orders.Add(o); return Task.FromResult(o);
+        var stored = Order.FromExisting(order.Id, order.PersonId, order.Status);
+        _orders.Add(stored);
+        return Task.FromResult(stored);
     }
-    public async Task<OrderDto> UpdateAsync(Guid id, UpdateOrderDto dto, CancellationToken ct)
+
+    public async Task<Order> UpdateStatusAsync(Guid id, OrderStatus status, CancellationToken ct)
     {
-        var o = await FindAsync(id, ct) ?? throw new KeyNotFoundException("Order not found");
-        o.Status = dto.Status; return o;
+        var order = await FindAsync(id, ct) ?? throw new KeyNotFoundException("Order not found");
+        order.UpdateStatus(status);
+        return order;
     }
 }

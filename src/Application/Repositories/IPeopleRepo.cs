@@ -1,19 +1,16 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using SolidApiExample.Application.People.CreatePerson;
-using SolidApiExample.Application.People.Shared;
-using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Application.Shared;
+using SolidApiExample.Domain.People;
 
 namespace SolidApiExample.Application.Repositories;
 
 public interface IPeopleRepo
 {
-    Task<PersonDto?> FindAsync(Guid id, CancellationToken ct);
-    Task<Paged<PersonDto>> ListAsync(int page, int size, CancellationToken ct);
-    Task<PersonDto> AddAsync(CreatePersonDto dto, CancellationToken ct);
-    Task<PersonDto> UpdateAsync(Guid id, UpdatePersonDto dto, CancellationToken ct);
+    Task<Person?> FindAsync(Guid id, CancellationToken ct);
+    Task<Paged<Person>> ListAsync(int page, int size, CancellationToken ct);
+    Task<Person> AddAsync(Person person, CancellationToken ct);
+    Task<Person> UpdateNameAsync(Guid id, string name, CancellationToken ct);
     Task DeleteAsync(Guid id, CancellationToken ct);
 }

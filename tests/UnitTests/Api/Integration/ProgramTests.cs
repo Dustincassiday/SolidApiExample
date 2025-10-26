@@ -1,14 +1,11 @@
-using System;
-using System.Net;
-using System.Net.Http;
+
 using System.Net.Http.Json;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 using SolidApiExample.Api;
 using SolidApiExample.Application.Orders.Shared;
 using SolidApiExample.Application.People.Shared;
-using Xunit;
 
 namespace SolidApiExample.UnitTests.Api.Integration;
 
@@ -18,7 +15,16 @@ public sealed class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
 
     public ProgramTests(WebApplicationFactory<Program> factory)
     {
-        _client = factory.WithWebHostBuilder(_ => { }).CreateClient();
+        _client = factory
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureLogging(logging => logging.ClearProviders());
+                builder.UseSetting("https_port", "443");
+            })
+            .CreateClient(new WebApplicationFactoryClientOptions
+            {
+                BaseAddress = new Uri("https://localhost")
+            });
     }
 
     [Fact]

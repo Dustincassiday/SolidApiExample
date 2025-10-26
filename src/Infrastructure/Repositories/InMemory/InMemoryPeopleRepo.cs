@@ -1,25 +1,25 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using SolidApiExample.Application.People.CreatePerson;
-using SolidApiExample.Application.People.Shared;
-using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Application.Repositories;
 using SolidApiExample.Application.Shared;
+using SolidApiExample.Domain.People;
 
 namespace SolidApiExample.Infrastructure.Repositories.InMemory;
 
 public sealed class InMemoryPeopleRepo : IPeopleRepo
 {
-    private readonly List<PersonDto> _people = new();
-    public Task<PersonDto?> FindAsync(Guid id, CancellationToken ct) =>
+    private readonly List<Person> _people = new();
+
+    public Task<Person?> FindAsync(Guid id, CancellationToken ct) =>
         Task.FromResult(_people.FirstOrDefault(p => p.Id == id));
-    public Task<Paged<PersonDto>> ListAsync(int page, int size, CancellationToken ct)
+
+    public Task<Paged<Person>> ListAsync(int page, int size, CancellationToken ct)
     {
-        var items = _people.Skip(page * size).Take(size).ToList();
-        return Task.FromResult(new Paged<PersonDto>
+        var items = _people
+            .Skip(page * size)
+            .Take(size)
+            .Select(p => Person.FromExisting(p.Id, p.Name))
+            .ToList();
+
+        return Task.FromResult(new Paged<Person>
         {
             Items = items,
             Page = page,
@@ -27,19 +27,23 @@ public sealed class InMemoryPeopleRepo : IPeopleRepo
             Total = _people.Count
         });
     }
-    public Task<PersonDto> AddAsync(CreatePersonDto dto, CancellationToken ct)
+
+    public Task<Person> AddAsync(Person person, CancellationToken ct)
     {
-        var p = new PersonDto { Id = Guid.NewGuid(), Name = dto.Name };
-        _people.Add(p); return Task.FromResult(p);
+        var stored = Person.FromExisting(person.Id, person.Name);
+        _people.Add(stored);
+        return Task.FromResult(stored);
     }
-    public async Task<PersonDto> UpdateAsync(Guid id, UpdatePersonDto dto, CancellationToken ct)
+
+    public async Task<Person> UpdateNameAsync(Guid id, string name, CancellationToken ct)
     {
-        var p = await FindAsync(id, ct) ?? throw new KeyNotFoundException("Person not found");
-        p.Name = dto.Name; return p;
+        var person = await FindAsync(id, ct) ?? throw new KeyNotFoundException("Person not found");
+        person.Rename(name);
+        return person;
     }
     public async Task DeleteAsync(Guid id, CancellationToken ct)
     {
-        var p = await FindAsync(id, ct) ?? throw new KeyNotFoundException("Person not found");
-        _people.Remove(p);
+        var person = await FindAsync(id, ct) ?? throw new KeyNotFoundException("Person not found");
+        _people.Remove(person);
     }
 }
