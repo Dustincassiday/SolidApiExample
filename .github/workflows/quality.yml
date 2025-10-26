@@ -44,14 +44,15 @@ jobs:
             /o:"${{ secrets.SONAR_ORGANIZATION }}" \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
+            /d:sonar.cs.vstest.reportsPaths="**/*.trx" \
+            /d:sonar.coverageReportPaths="**/coverage.cobertura.xml" \
             /d:sonar.coverage.exclusions="**/bin/**,**/obj/**"
 
       - name: Build
         run: dotnet build SolidApiExample.sln --configuration Release --no-restore
 
       - name: Test with Coverage
-        run: dotnet test SolidApiExample.sln --configuration Release --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=TestResults/coverage
+        run: dotnet test SolidApiExample.sln --configuration Release --no-build --collect:"XPlat Code Coverage" --logger "trx"
 
       - name: SonarCloud - End Analysis
         if: always()
@@ -66,5 +67,5 @@ jobs:
         with:
           name: coverage
           path: |
-            **/TestResults/coverage.opencover.xml
+            **/coverage.cobertura.xml
             **/TestResults/**/*.trx
