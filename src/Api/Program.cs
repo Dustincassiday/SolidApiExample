@@ -53,3 +53,8 @@ app.UseSwaggerUI();
 app.MapControllers();
 
 await app.RunAsync();
+
+/// <summary>
+/// This only exists to serve as an entry point to spin up an app client from WebApplicationFactory
+/// </summary>
+public partial class Program { }
