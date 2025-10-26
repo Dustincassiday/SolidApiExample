@@ -1,4 +1,4 @@
-
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 using SolidApiExample.Api.Controllers;
 using SolidApiExample.Application.Contracts;
@@ -31,7 +31,8 @@ public sealed class OrdersControllerTests
 
         var result = await controller.Get(orderId, cancellation);
 
-        Assert.Same(expected, result);
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.Same(expected, ok.Value);
         _getMock.Verify(m => m.GetAsync(orderId, cancellation), Times.Once);
     }
 
@@ -62,7 +63,8 @@ public sealed class OrdersControllerTests
 
         var result = await controller.List(page, size, cancellation);
 
-        Assert.Same(expected, result);
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.Same(expected, ok.Value);
         _listMock.Verify(m => m.ListAsync(page, size, cancellation), Times.Once);
     }
 
@@ -81,7 +83,10 @@ public sealed class OrdersControllerTests
 
         var result = await controller.Create(dto, cancellation);
 
-        Assert.Same(expected, result);
+        var created = Assert.IsType<CreatedAtActionResult>(result.Result);
+        Assert.Equal(nameof(OrdersController.Get), created.ActionName);
+        Assert.Equal(expected.Id, ((dynamic)created.RouteValues!)?["id"]);
+        Assert.Same(expected, created.Value);
         _createMock.Verify(m => m.CreateAsync(dto, cancellation), Times.Once);
     }
 
@@ -101,7 +106,8 @@ public sealed class OrdersControllerTests
 
         var result = await controller.Update(orderId, dto, cancellation);
 
-        Assert.Same(expected, result);
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.Same(expected, ok.Value);
         _updateMock.Verify(m => m.UpdateAsync(orderId, dto, cancellation), Times.Once);
     }
 

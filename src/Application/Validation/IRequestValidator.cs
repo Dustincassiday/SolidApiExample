@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace SolidApiExample.Application.Validation;
 
 public interface IRequestValidator<in TRequest>

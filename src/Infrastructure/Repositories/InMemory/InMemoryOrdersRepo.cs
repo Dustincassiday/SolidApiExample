@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using SolidApiExample.Application.Orders.CreateOrder;
 using SolidApiExample.Application.Orders.Shared;
 using SolidApiExample.Application.Orders.UpdateOrder;
@@ -19,7 +14,13 @@ public sealed class InMemoryOrdersRepo : IOrdersRepo
     public Task<Paged<OrderDto>> ListAsync(int page, int size, CancellationToken ct)
     {
         var items = _orders.Skip(page * size).Take(size).ToList();
-        return Task.FromResult(new Paged<OrderDto> { Items = items, Page = page, Size = size, Total = _orders.Count });
+        return Task.FromResult(new Paged<OrderDto>
+        {
+            Items = items,
+            Page = page,
+            Size = size,
+            Total = _orders.Count
+        });
     }
     public Task<OrderDto> AddAsync(CreateOrderDto dto, CancellationToken ct)
     {

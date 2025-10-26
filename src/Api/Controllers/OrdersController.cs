@@ -28,18 +28,43 @@ public sealed class OrdersController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public Task<OrderDto> Get(Guid id, CancellationToken ct) =>
-        _get.GetAsync(id, ct);
+    [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<OrderDto>> Get(Guid id, CancellationToken ct)
+    {
+        var order = await _get.GetAsync(id, ct);
+        return Ok(order);
+    }
 
     [HttpGet]
-    public Task<Paged<OrderDto>> List([FromQuery] int page = 0, [FromQuery] int size = 20, CancellationToken ct = default) =>
-        _list.ListAsync(page, size, ct);
+    [ProducesResponseType(typeof(Paged<OrderDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<Paged<OrderDto>>> List([
+        FromQuery] int page = 0,
+        [FromQuery] int size = 20,
+        CancellationToken ct = default)
+    {
+        var orders = await _list.ListAsync(page, size, ct);
+        return Ok(orders);
+    }
 
     [HttpPost]
-    public Task<OrderDto> Create(CreateOrderDto dto, CancellationToken ct) =>
-        _create.CreateAsync(dto, ct);
+    [ProducesResponseType(typeof(OrderDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<OrderDto>> Create(CreateOrderDto dto, CancellationToken ct)
+    {
+        var order = await _create.CreateAsync(dto, ct);
+        return CreatedAtAction(nameof(Get), new { id = order.Id }, order);
+    }
 
     [HttpPut("{id}")]
-    public Task<OrderDto> Update(Guid id, UpdateOrderDto dto, CancellationToken ct) =>
-        _update.UpdateAsync(id, dto, ct);
+    [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<OrderDto>> Update(Guid id, UpdateOrderDto dto, CancellationToken ct)
+    {
+        var order = await _update.UpdateAsync(id, dto, ct);
+        return Ok(order);
+    }
 }

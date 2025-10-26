@@ -1,4 +1,5 @@
 using SolidApiExample.Application.Contracts;
+using SolidApiExample.Api.Errors;
 using SolidApiExample.Application.Orders.CreateOrder;
 using SolidApiExample.Application.Orders.GetOrder;
 using SolidApiExample.Application.Orders.ListOrders;
@@ -18,6 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
 
 // Repos
 builder.Services.AddSingleton<IPeopleRepo, InMemoryPeopleRepo>();
@@ -39,6 +42,7 @@ builder.Services.AddScoped<IUpdate<Guid, UpdateOrderDto, OrderDto>, UpdateOrder>
 var app = builder.Build();
 
 // Configure middleware pipeline
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 

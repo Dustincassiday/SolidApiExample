@@ -19,7 +19,13 @@ public sealed class InMemoryPeopleRepo : IPeopleRepo
     public Task<Paged<PersonDto>> ListAsync(int page, int size, CancellationToken ct)
     {
         var items = _people.Skip(page * size).Take(size).ToList();
-        return Task.FromResult(new Paged<PersonDto> { Items = items, Page = page, Size = size, Total = _people.Count });
+        return Task.FromResult(new Paged<PersonDto>
+        {
+            Items = items,
+            Page = page,
+            Size = size,
+            Total = _people.Count
+        });
     }
     public Task<PersonDto> AddAsync(CreatePersonDto dto, CancellationToken ct)
     {

@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 using SolidApiExample.Api.Controllers;
 using SolidApiExample.Application.Contracts;
@@ -9,7 +6,7 @@ using SolidApiExample.Application.People.CreatePerson;
 using SolidApiExample.Application.People.Shared;
 using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Application.Shared;
-using Xunit;
+
 
 namespace SolidApiExample.UnitTests.Controllers;
 
@@ -36,7 +33,8 @@ public sealed class PeopleControllerTests
 
         var result = await controller.Get(personId, cancellation);
 
-        Assert.Same(expected, result);
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.Same(expected, ok.Value);
         _getMock.Verify(m => m.GetAsync(personId, cancellation), Times.Once);
     }
 
@@ -67,7 +65,8 @@ public sealed class PeopleControllerTests
 
         var result = await controller.List(page, size, cancellation);
 
-        Assert.Same(expected, result);
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.Same(expected, ok.Value);
         _listMock.Verify(m => m.ListAsync(page, size, cancellation), Times.Once);
     }
 
@@ -86,7 +85,10 @@ public sealed class PeopleControllerTests
 
         var result = await controller.Create(dto, cancellation);
 
-        Assert.Same(expected, result);
+        var created = Assert.IsType<CreatedAtActionResult>(result.Result);
+        Assert.Equal(nameof(PeopleController.Get), created.ActionName);
+        Assert.Equal(expected.Id, ((dynamic)created.RouteValues!)?["id"]);
+        Assert.Same(expected, created.Value);
         _createMock.Verify(m => m.CreateAsync(dto, cancellation), Times.Once);
     }
 
@@ -106,7 +108,8 @@ public sealed class PeopleControllerTests
 
         var result = await controller.Update(personId, dto, cancellation);
 
-        Assert.Same(expected, result);
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.Same(expected, ok.Value);
         _updateMock.Verify(m => m.UpdateAsync(personId, dto, cancellation), Times.Once);
     }
 
@@ -122,8 +125,9 @@ public sealed class PeopleControllerTests
 
         var controller = CreateController();
 
-        await controller.Delete(personId, cancellation);
+        var result = await controller.Delete(personId, cancellation);
 
+        Assert.IsType<NoContentResult>(result);
         _deleteMock.Verify(m => m.DeleteAsync(personId, cancellation), Times.Once);
     }
 

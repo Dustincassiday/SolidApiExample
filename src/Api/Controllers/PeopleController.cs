@@ -31,22 +31,53 @@ public sealed class PeopleController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public Task<PersonDto> Get(Guid id, CancellationToken ct) =>
-        _get.GetAsync(id, ct);
+    [ProducesResponseType(typeof(PersonDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PersonDto>> Get(Guid id, CancellationToken ct)
+    {
+        var person = await _get.GetAsync(id, ct);
+        return Ok(person);
+    }
 
     [HttpGet]
-    public Task<Paged<PersonDto>> List([FromQuery] int page = 0, [FromQuery] int size = 20, CancellationToken ct = default) =>
-        _list.ListAsync(page, size, ct);
+    [ProducesResponseType(typeof(Paged<PersonDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<Paged<PersonDto>>> List([
+        FromQuery] int page = 0,
+        [FromQuery] int size = 20,
+        CancellationToken ct = default)
+    {
+        var people = await _list.ListAsync(page, size, ct);
+        return Ok(people);
+    }
 
     [HttpPost]
-    public Task<PersonDto> Create(CreatePersonDto dto, CancellationToken ct) =>
-        _create.CreateAsync(dto, ct);
+    [ProducesResponseType(typeof(PersonDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PersonDto>> Create(CreatePersonDto dto, CancellationToken ct)
+    {
+        var person = await _create.CreateAsync(dto, ct);
+        return CreatedAtAction(nameof(Get), new { id = person.Id }, person);
+    }
 
     [HttpPut("{id}")]
-    public Task<PersonDto> Update(Guid id, UpdatePersonDto dto, CancellationToken ct) =>
-        _update.UpdateAsync(id, dto, ct);
+    [ProducesResponseType(typeof(PersonDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PersonDto>> Update(Guid id, UpdatePersonDto dto, CancellationToken ct)
+    {
+        var person = await _update.UpdateAsync(id, dto, ct);
+        return Ok(person);
+    }
 
     [HttpDelete("{id}")]
-    public Task Delete(Guid id, CancellationToken ct) =>
-        _delete.DeleteAsync(id, ct);
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        await _delete.DeleteAsync(id, ct);
+        return NoContent();
+    }
 }
