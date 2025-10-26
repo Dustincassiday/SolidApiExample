@@ -16,8 +16,6 @@ jobs:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-      SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,6 +38,9 @@ jobs:
         run: dotnet restore SolidApiExample.sln
 
       - name: SonarCloud - Begin Analysis
+        env:
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         run: |
           dotnet sonarscanner begin \
             /k:"$SONAR_PROJECT_KEY" \
@@ -70,7 +71,6 @@ jobs:
             -reporttypes:SonarQube
 
       - name: SonarCloud - End Analysis
-        if: always()
         env:
           PATH: $HOME/.dotnet/tools:$PATH
         run: dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN"
