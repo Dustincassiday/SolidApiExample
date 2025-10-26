@@ -52,11 +52,11 @@ jobs:
         run: dotnet build SolidApiExample.sln --configuration Release --no-restore
 
       - name: Test with Coverage
-        run: dotnet test SolidApiExample.sln --configuration Release --no-build --collect:"XPlat Code Coverage" --logger "trx"
+        run: dotnet test SolidApiExample.sln --configuration Release --no-build --results-directory TestResults --collect:"XPlat Code Coverage" --logger "trx;LogFileName=tests.trx"
 
       - name: Prepare Coverage Report
         run: |
-          COVERAGE_FILE=$(find . -path '*TestResults*' -name 'coverage.cobertura.xml' | head -n 1)
+          COVERAGE_FILE=$(find TestResults -name 'coverage.cobertura.xml' | head -n 1)
           if [ -z "$COVERAGE_FILE" ]; then
             echo "Coverage file not found"
             exit 1
