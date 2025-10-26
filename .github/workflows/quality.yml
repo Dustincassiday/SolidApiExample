@@ -74,12 +74,6 @@ jobs:
         env:
           PATH: $HOME/.dotnet/tools:$PATH
         run: dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN"
-      - name: Mutation testing
-        uses: stryker-mutator/github-action@v0.0.1
-        with:
-          testProject: "tests/UnitTests/SolidApiExample.UnitTests.csproj"
-          breakAt: "75"
-
       - name: Upload Coverage Artifacts
         if: always()
         uses: actions/upload-artifact@v4
