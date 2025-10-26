@@ -1,8 +1,15 @@
 using SolidApiExample.Application.Contracts;
-using SolidApiExample.Application.Orders.DTOs;
-using SolidApiExample.Application.Orders.Handlers;
-using SolidApiExample.Application.People.DTOs;
-using SolidApiExample.Application.People.Handlers;
+using SolidApiExample.Application.Orders.CreateOrder;
+using SolidApiExample.Application.Orders.GetOrder;
+using SolidApiExample.Application.Orders.ListOrders;
+using SolidApiExample.Application.Orders.Shared;
+using SolidApiExample.Application.Orders.UpdateOrder;
+using SolidApiExample.Application.People.CreatePerson;
+using SolidApiExample.Application.People.DeletePerson;
+using SolidApiExample.Application.People.GetPerson;
+using SolidApiExample.Application.People.ListPeople;
+using SolidApiExample.Application.People.Shared;
+using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Application.Repositories;
 using SolidApiExample.Infrastructure.Repositories.InMemory;
 

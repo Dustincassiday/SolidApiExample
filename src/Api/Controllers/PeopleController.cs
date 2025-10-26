@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using SolidApiExample.Application.Contracts;
-using SolidApiExample.Application.People.DTOs;
+using SolidApiExample.Application.People.CreatePerson;
+using SolidApiExample.Application.People.Shared;
+using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Application.Shared;
 
-namespace SolidApiExample.Api.Controllers.People;
+namespace SolidApiExample.Api.Controllers;
 
 [ApiController, Route("api/people")]
 public sealed class PeopleController : ControllerBase

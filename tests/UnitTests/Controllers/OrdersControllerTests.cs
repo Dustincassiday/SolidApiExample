@@ -1,10 +1,11 @@
 
 using Moq;
-using SolidApiExample.Api.Controllers.Orders;
+using SolidApiExample.Api.Controllers;
 using SolidApiExample.Application.Contracts;
-using SolidApiExample.Application.Orders.DTOs;
+using SolidApiExample.Application.Orders.CreateOrder;
+using SolidApiExample.Application.Orders.Shared;
+using SolidApiExample.Application.Orders.UpdateOrder;
 using SolidApiExample.Application.Shared;
-
 
 namespace SolidApiExample.UnitTests.Controllers;
 

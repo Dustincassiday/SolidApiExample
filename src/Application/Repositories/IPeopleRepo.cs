@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using SolidApiExample.Application.People.DTOs;
+using SolidApiExample.Application.People.CreatePerson;
+using SolidApiExample.Application.People.Shared;
+using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Application.Shared;
 
 namespace SolidApiExample.Application.Repositories;

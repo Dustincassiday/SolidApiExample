@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using SolidApiExample.Application.Orders.DTOs;
+using SolidApiExample.Application.Orders.CreateOrder;
+using SolidApiExample.Application.Orders.Shared;
+using SolidApiExample.Application.Orders.UpdateOrder;
 using SolidApiExample.Application.Repositories;
 using SolidApiExample.Application.Shared;
 

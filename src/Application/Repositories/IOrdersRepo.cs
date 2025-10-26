@@ -1,7 +1,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using SolidApiExample.Application.Orders.DTOs;
+using SolidApiExample.Application.Orders.CreateOrder;
+using SolidApiExample.Application.Orders.Shared;
+using SolidApiExample.Application.Orders.UpdateOrder;
 using SolidApiExample.Application.Shared;
 
 namespace SolidApiExample.Application.Repositories;

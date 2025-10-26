@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Moq;
-using SolidApiExample.Api.Controllers.People;
+using SolidApiExample.Api.Controllers;
 using SolidApiExample.Application.Contracts;
-using SolidApiExample.Application.People.DTOs;
+using SolidApiExample.Application.People.CreatePerson;
+using SolidApiExample.Application.People.Shared;
+using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Application.Shared;
 using Xunit;
 
