@@ -1,5 +1,9 @@
-using SolidApiExample.Application.Contracts;
+using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using SolidApiExample.Api.Errors;
+using SolidApiExample.Application.Contracts;
 using SolidApiExample.Application.Orders.CreateOrder;
 using SolidApiExample.Application.Orders.GetOrder;
 using SolidApiExample.Application.Orders.ListOrders;
@@ -14,47 +18,58 @@ using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Application.Repositories;
 using SolidApiExample.Infrastructure.Repositories.InMemory;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace SolidApiExample.Api;
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
+public class Program
+{
+    public static async Task Main(string[] args)
+    {
+        var app = BuildApp(args);
+        await app.RunAsync();
+    }
 
-// Repos
-builder.Services.AddSingleton<IPeopleRepo, InMemoryPeopleRepo>();
-builder.Services.AddSingleton<IOrdersRepo, InMemoryOrdersRepo>();
+    internal static WebApplication BuildApp(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+        ConfigureServices(builder.Services);
 
-// People handlers
-builder.Services.AddScoped<IGetById<Guid, PersonDto>, GetPerson>();
-builder.Services.AddScoped<IListItems<PersonDto>, ListPeople>();
-builder.Services.AddScoped<ICreate<CreatePersonDto, PersonDto>, CreatePerson>();
-builder.Services.AddScoped<IUpdate<Guid, UpdatePersonDto, PersonDto>, UpdatePerson>();
-builder.Services.AddScoped<IDelete<Guid>, DeletePerson>();
+        var app = builder.Build();
+        ConfigurePipeline(app);
+        return app;
+    }
 
-// Orders handlers
-builder.Services.AddScoped<IGetById<Guid, OrderDto>, GetOrder>();
-builder.Services.AddScoped<IListItems<OrderDto>, ListOrders>();
-builder.Services.AddScoped<ICreate<CreateOrderDto, OrderDto>, CreateOrder>();
-builder.Services.AddScoped<IUpdate<Guid, UpdateOrderDto, OrderDto>, UpdateOrder>();
+    internal static void ConfigureServices(IServiceCollection services)
+    {
+        services.AddControllers();
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
+        services.AddProblemDetails();
+        services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
 
-var app = builder.Build();
+        services.AddSingleton<IPeopleRepo, InMemoryPeopleRepo>();
+        services.AddSingleton<IOrdersRepo, InMemoryOrdersRepo>();
 
-// Configure middleware pipeline
-app.UseExceptionHandler();
-app.UseHttpsRedirection();
-app.UseAuthorization();
+        services.AddScoped<IGetById<Guid, PersonDto>, GetPerson>();
+        services.AddScoped<IListItems<PersonDto>, ListPeople>();
+        services.AddScoped<ICreate<CreatePersonDto, PersonDto>, CreatePerson>();
+        services.AddScoped<IUpdate<Guid, UpdatePersonDto, PersonDto>, UpdatePerson>();
+        services.AddScoped<IDelete<Guid>, DeletePerson>();
 
-// NOTE: Swagger in dev
-app.UseSwagger();
-app.UseSwaggerUI();
+        services.AddScoped<IGetById<Guid, OrderDto>, GetOrder>();
+        services.AddScoped<IListItems<OrderDto>, ListOrders>();
+        services.AddScoped<ICreate<CreateOrderDto, OrderDto>, CreateOrder>();
+        services.AddScoped<IUpdate<Guid, UpdateOrderDto, OrderDto>, UpdateOrder>();
+    }
 
-app.MapControllers();
+    internal static void ConfigurePipeline(WebApplication app)
+    {
+        app.UseExceptionHandler();
+        app.UseHttpsRedirection();
+        app.UseAuthorization();
 
-await app.RunAsync();
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
-/// <summary>
-/// This only exists to serve as an entry point to spin up an app client from WebApplicationFactory
-/// </summary>
-public partial class Program { }
+        app.MapControllers();
+    }
+}
