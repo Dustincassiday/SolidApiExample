@@ -2,9 +2,9 @@ name: Quality
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 jobs:
   quality:
@@ -45,7 +45,7 @@ jobs:
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.vstest.reportsPaths="**/*.trx" \
-            /d:sonar.coverageReportPaths="**/coverage.cobertura.xml" \
+            /d:sonar.coverageReportPaths="TestResults/coverage/coverage.cobertura.xml" \
             /d:sonar.coverage.exclusions="**/bin/**,**/obj/**"
 
       - name: Build
@@ -53,6 +53,16 @@ jobs:
 
       - name: Test with Coverage
         run: dotnet test SolidApiExample.sln --configuration Release --no-build --collect:"XPlat Code Coverage" --logger "trx"
+
+      - name: Prepare Coverage Report
+        run: |
+          COVERAGE_FILE=$(find . -path '*TestResults*' -name 'coverage.cobertura.xml' | head -n 1)
+          if [ -z "$COVERAGE_FILE" ]; then
+            echo "Coverage file not found"
+            exit 1
+          fi
+          mkdir -p TestResults/coverage
+          cp "$COVERAGE_FILE" TestResults/coverage/coverage.cobertura.xml
 
       - name: SonarCloud - End Analysis
         if: always()
@@ -67,5 +77,5 @@ jobs:
         with:
           name: coverage
           path: |
-            **/coverage.cobertura.xml
+            TestResults/coverage/coverage.cobertura.xml
             **/TestResults/**/*.trx
