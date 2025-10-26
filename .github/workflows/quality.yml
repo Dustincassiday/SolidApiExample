@@ -30,6 +30,8 @@ jobs:
       - name: Install dotnet tools
         run: |
           dotnet tool install --global dotnet-sonarscanner
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          dotnet tool install --global coverlet.console
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
       - name: Restore
@@ -44,25 +46,28 @@ jobs:
             /o:"${{ secrets.SONAR_ORGANIZATION }}" \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.vstest.reportsPaths="**/*.trx" \
-            /d:sonar.coverageReportPaths="TestResults/coverage/coverage.cobertura.xml" \
+            /d:sonar.cs.vstest.reportsPaths="TestResults/tests.trx" \
+            /d:sonar.coverageReportPaths="TestResults/coverage/report/SonarQube.xml" \
             /d:sonar.coverage.exclusions="**/bin/**,**/obj/**"
 
       - name: Build
         run: dotnet build SolidApiExample.sln --configuration Release --no-restore
 
       - name: Test with Coverage
-        run: dotnet test SolidApiExample.sln --configuration Release --no-build --collect:"XPlat Code Coverage" --logger "trx"
-
-      - name: Prepare Coverage Report
         run: |
-          COVERAGE_FILE=$(find . -path '*TestResults*' -name 'coverage.cobertura.xml' | head -n 1)
-          if [ -z "$COVERAGE_FILE" ]; then
-            echo "Coverage file not found"
-            exit 1
-          fi
           mkdir -p TestResults/coverage
-          cp "$COVERAGE_FILE" TestResults/coverage/coverage.cobertura.xml
+          coverlet tests/UnitTests/bin/Release/net9.0/SolidApiExample.UnitTests.dll \
+            --target "dotnet" \
+            --targetargs "test SolidApiExample.sln --configuration Release --no-build --logger \"trx;LogFileName=tests.trx\" --results-directory TestResults" \
+            --format cobertura \
+            --output TestResults/coverage/coverage.cobertura.xml
+
+      - name: Convert Coverage to Sonar Format
+        run: |
+          reportgenerator \
+            -reports:TestResults/coverage/coverage.cobertura.xml \
+            -targetdir:TestResults/coverage/report \
+            -reporttypes:SonarQube
 
       - name: SonarCloud - End Analysis
         if: always()
@@ -78,4 +83,5 @@ jobs:
           name: coverage
           path: |
             TestResults/coverage/coverage.cobertura.xml
+            TestResults/coverage/report/SonarQube.xml
             **/TestResults/**/*.trx
