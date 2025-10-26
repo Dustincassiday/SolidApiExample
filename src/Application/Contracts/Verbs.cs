@@ -1,23 +1,30 @@
+using System.Threading;
+using System.Threading.Tasks;
+using SolidApiExample.Application.Shared;
+
 namespace SolidApiExample.Application.Contracts;
 
-
-public interface IGetById<TId, TOut>
+public interface IGetById<in TId, TOut>
 {
     Task<TOut> GetAsync(TId id, CancellationToken ct = default);
 }
+
 public interface IListItems<TOut>
 {
-    Task<Shared.Paged<TOut>> ListAsync(int page, int size, CancellationToken ct = default);
+    Task<Paged<TOut>> ListAsync(int page, int size, CancellationToken ct = default);
 }
-public interface ICreate<TIn, TOut>
+
+public interface ICreate<in TIn, TOut>
 {
     Task<TOut> CreateAsync(TIn input, CancellationToken ct = default);
 }
-public interface IUpdate<TId, TIn, TOut>
+
+public interface IUpdate<in TId, in TIn, TOut>
 {
     Task<TOut> UpdateAsync(TId id, TIn input, CancellationToken ct = default);
 }
-public interface IDelete<TId>
+
+public interface IDelete<in TId>
 {
     Task DeleteAsync(TId id, CancellationToken ct = default);
 }
