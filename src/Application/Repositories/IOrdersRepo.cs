@@ -1,17 +1,15 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using SolidApiExample.Application.Orders.CreateOrder;
-using SolidApiExample.Application.Orders.Shared;
-using SolidApiExample.Application.Orders.UpdateOrder;
 using SolidApiExample.Application.Shared;
+using SolidApiExample.Domain.Orders;
 
 namespace SolidApiExample.Application.Repositories;
 
 public interface IOrdersRepo
 {
-    Task<OrderDto?> FindAsync(Guid id, CancellationToken ct);
-    Task<Paged<OrderDto>> ListAsync(int page, int size, CancellationToken ct);
-    Task<OrderDto> AddAsync(CreateOrderDto dto, CancellationToken ct);
-    Task<OrderDto> UpdateAsync(Guid id, UpdateOrderDto dto, CancellationToken ct);
+    Task<Order?> FindAsync(Guid id, CancellationToken ct);
+    Task<Paged<Order>> ListAsync(int page, int size, CancellationToken ct);
+    Task<Order> AddAsync(Order order, CancellationToken ct);
+    Task<Order> UpdateStatusAsync(Guid id, OrderStatus status, CancellationToken ct);
 }

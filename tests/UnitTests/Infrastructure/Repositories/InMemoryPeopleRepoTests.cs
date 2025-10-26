@@ -1,9 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using SolidApiExample.Application.People.CreatePerson;
-using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Infrastructure.Repositories.InMemory;
+using SolidApiExample.Domain.People;
 using Xunit;
 
 namespace SolidApiExample.UnitTests.Infrastructure.Repositories;
@@ -16,7 +15,7 @@ public sealed class InMemoryPeopleRepoTests
     [Fact]
     public async Task AddAsync_AssignsIdAndPersistsPerson()
     {
-        var create = new CreatePersonDto { Name = "Ada Lovelace" };
+        var create = Person.Create("Ada Lovelace");
 
         var person = await _repo.AddAsync(create, _ct);
 
@@ -30,8 +29,8 @@ public sealed class InMemoryPeopleRepoTests
     [Fact]
     public async Task ListAsync_ReturnsPagedPeople()
     {
-        await _repo.AddAsync(new CreatePersonDto { Name = "Ada Lovelace" }, _ct);
-        await _repo.AddAsync(new CreatePersonDto { Name = "Grace Hopper" }, _ct);
+        await _repo.AddAsync(Person.Create("Ada Lovelace"), _ct);
+        await _repo.AddAsync(Person.Create("Grace Hopper"), _ct);
 
         var page = await _repo.ListAsync(page: 0, size: 1, _ct);
 
@@ -44,10 +43,10 @@ public sealed class InMemoryPeopleRepoTests
     [Fact]
     public async Task UpdateAsync_ChangesExistingPerson()
     {
-        var person = await _repo.AddAsync(new CreatePersonDto { Name = "Ada Lovelace" }, _ct);
-        var update = new UpdatePersonDto { Name = "Ada King" };
+        var person = await _repo.AddAsync(Person.Create("Ada Lovelace"), _ct);
+        var updateName = "Ada King";
 
-        var updated = await _repo.UpdateAsync(person.Id, update, _ct);
+        var updated = await _repo.UpdateNameAsync(person.Id, updateName, _ct);
 
         Assert.Equal(person.Id, updated.Id);
         Assert.Equal("Ada King", updated.Name);
@@ -56,16 +55,14 @@ public sealed class InMemoryPeopleRepoTests
     [Fact]
     public async Task UpdateAsync_Throws_WhenPersonMissing()
     {
-        var update = new UpdatePersonDto { Name = "Alan Turing" };
-
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _repo.UpdateAsync(Guid.NewGuid(), update, _ct));
+            _repo.UpdateNameAsync(Guid.NewGuid(), "Alan Turing", _ct));
     }
 
     [Fact]
     public async Task DeleteAsync_RemovesPerson()
     {
-        var person = await _repo.AddAsync(new CreatePersonDto { Name = "Grace Hopper" }, _ct);
+        var person = await _repo.AddAsync(Person.Create("Grace Hopper"), _ct);
 
         await _repo.DeleteAsync(person.Id, _ct);
 

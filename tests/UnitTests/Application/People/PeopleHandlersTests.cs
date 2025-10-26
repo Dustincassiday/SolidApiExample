@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Moq;
@@ -11,6 +12,7 @@ using SolidApiExample.Application.People.Shared;
 using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Application.Repositories;
 using SolidApiExample.Application.Shared;
+using SolidApiExample.Domain.People;
 using Xunit;
 
 namespace SolidApiExample.UnitTests.Application.People;
@@ -23,7 +25,7 @@ public sealed class PeopleHandlersTests
     public async Task GetPerson_Returns_Person_WhenFound()
     {
         var personId = Guid.NewGuid();
-        var expected = new PersonDto { Id = personId, Name = "Ada Lovelace" };
+        var expected = Person.FromExisting(personId, "Ada Lovelace");
 
         _repoMock
             .Setup(m => m.FindAsync(personId, CancellationToken.None))
@@ -33,7 +35,8 @@ public sealed class PeopleHandlersTests
 
         var result = await handler.GetAsync(personId, CancellationToken.None);
 
-        Assert.Same(expected, result);
+        Assert.Equal(expected.Id, result.Id);
+        Assert.Equal(expected.Name, result.Name);
         _repoMock.Verify(m => m.FindAsync(personId, CancellationToken.None), Times.Once);
     }
 
@@ -44,7 +47,7 @@ public sealed class PeopleHandlersTests
 
         _repoMock
             .Setup(m => m.FindAsync(personId, CancellationToken.None))
-            .ReturnsAsync((PersonDto?)null);
+            .ReturnsAsync((Person?)null);
 
         var handler = new GetPerson(_repoMock.Object);
 
@@ -57,11 +60,11 @@ public sealed class PeopleHandlersTests
     {
         const int page = 0;
         const int size = 20;
-        var expected = new Paged<PersonDto>
+        var expected = new Paged<Person>
         {
-            Items = new List<PersonDto>
+            Items = new List<Person>
             {
-                new() { Id = Guid.NewGuid(), Name = "Grace Hopper" }
+                Person.FromExisting(Guid.NewGuid(), "Grace Hopper")
             },
             Page = page,
             Size = size,
@@ -76,7 +79,11 @@ public sealed class PeopleHandlersTests
 
         var result = await handler.ListAsync(page, size, CancellationToken.None);
 
-        Assert.Same(expected, result);
+        Assert.Equal(expected.Total, result.Total);
+        Assert.Equal(expected.Page, result.Page);
+        Assert.Equal(expected.Size, result.Size);
+        Assert.Single(result.Items);
+        Assert.Equal(expected.Items.First().Name, result.Items.First().Name);
         _repoMock.Verify(m => m.ListAsync(page, size, CancellationToken.None), Times.Once);
     }
 
@@ -84,18 +91,16 @@ public sealed class PeopleHandlersTests
     public async Task CreatePerson_Forwards_ToRepository()
     {
         var dto = new CreatePersonDto { Name = "Alan Turing" };
-        var expected = new PersonDto { Id = Guid.NewGuid(), Name = dto.Name };
-
         _repoMock
-            .Setup(m => m.AddAsync(dto, CancellationToken.None))
-            .ReturnsAsync(expected);
+            .Setup(m => m.AddAsync(It.IsAny<Person>(), CancellationToken.None))
+            .ReturnsAsync((Person p, CancellationToken _) => Person.FromExisting(p.Id, p.Name));
 
         var handler = new CreatePerson(_repoMock.Object);
 
         var result = await handler.CreateAsync(dto, CancellationToken.None);
 
-        Assert.Same(expected, result);
-        _repoMock.Verify(m => m.AddAsync(dto, CancellationToken.None), Times.Once);
+        Assert.Equal(dto.Name, result.Name);
+        _repoMock.Verify(m => m.AddAsync(It.Is<Person>(p => p.Name == dto.Name), CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -103,18 +108,19 @@ public sealed class PeopleHandlersTests
     {
         var personId = Guid.NewGuid();
         var dto = new UpdatePersonDto { Name = "Updated Name" };
-        var expected = new PersonDto { Id = personId, Name = dto.Name };
+        var expected = Person.FromExisting(personId, dto.Name);
 
         _repoMock
-            .Setup(m => m.UpdateAsync(personId, dto, CancellationToken.None))
+            .Setup(m => m.UpdateNameAsync(personId, dto.Name, CancellationToken.None))
             .ReturnsAsync(expected);
 
         var handler = new UpdatePerson(_repoMock.Object);
 
         var result = await handler.UpdateAsync(personId, dto, CancellationToken.None);
 
-        Assert.Same(expected, result);
-        _repoMock.Verify(m => m.UpdateAsync(personId, dto, CancellationToken.None), Times.Once);
+        Assert.Equal(expected.Id, result.Id);
+        Assert.Equal(expected.Name, result.Name);
+        _repoMock.Verify(m => m.UpdateNameAsync(personId, dto.Name, CancellationToken.None), Times.Once);
     }
 
     [Fact]

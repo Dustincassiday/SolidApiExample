@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Moq;
+using System.Linq;
 using SolidApiExample.Application.Orders.CreateOrder;
 using SolidApiExample.Application.Orders.GetOrder;
 using SolidApiExample.Application.Orders.ListOrders;
@@ -10,6 +11,7 @@ using SolidApiExample.Application.Orders.Shared;
 using SolidApiExample.Application.Orders.UpdateOrder;
 using SolidApiExample.Application.Repositories;
 using SolidApiExample.Application.Shared;
+using SolidApiExample.Domain.Orders;
 using Xunit;
 
 namespace SolidApiExample.UnitTests.Application.Orders;
@@ -22,7 +24,7 @@ public sealed class OrdersHandlersTests
     public async Task GetOrder_Returns_Order_WhenFound()
     {
         var orderId = Guid.NewGuid();
-        var expected = new OrderDto { Id = orderId, PersonId = Guid.NewGuid(), Status = "Pending" };
+        var expected = Order.FromExisting(orderId, Guid.NewGuid(), OrderStatus.Pending);
 
         _repoMock
             .Setup(m => m.FindAsync(orderId, CancellationToken.None))
@@ -32,7 +34,9 @@ public sealed class OrdersHandlersTests
 
         var result = await handler.GetAsync(orderId, CancellationToken.None);
 
-        Assert.Same(expected, result);
+        Assert.Equal(expected.Id, result.Id);
+        Assert.Equal(expected.PersonId, result.PersonId);
+        Assert.Equal(expected.Status.ToString(), result.Status);
         _repoMock.Verify(m => m.FindAsync(orderId, CancellationToken.None), Times.Once);
     }
 
@@ -43,7 +47,7 @@ public sealed class OrdersHandlersTests
 
         _repoMock
             .Setup(m => m.FindAsync(orderId, CancellationToken.None))
-            .ReturnsAsync((OrderDto?)null);
+            .ReturnsAsync((Order?)null);
 
         var handler = new GetOrder(_repoMock.Object);
 
@@ -56,11 +60,11 @@ public sealed class OrdersHandlersTests
     {
         const int page = 1;
         const int size = 10;
-        var expected = new Paged<OrderDto>
+        var expected = new Paged<Order>
         {
-            Items = new List<OrderDto>
+            Items = new List<Order>
             {
-                new() { Id = Guid.NewGuid(), PersonId = Guid.NewGuid(), Status = "Pending" }
+                Order.FromExisting(Guid.NewGuid(), Guid.NewGuid(), OrderStatus.Pending)
             },
             Page = page,
             Size = size,
@@ -75,7 +79,11 @@ public sealed class OrdersHandlersTests
 
         var result = await handler.ListAsync(page, size, CancellationToken.None);
 
-        Assert.Same(expected, result);
+        Assert.Equal(expected.Total, result.Total);
+        Assert.Equal(expected.Page, result.Page);
+        Assert.Equal(expected.Size, result.Size);
+        Assert.Single(result.Items);
+        Assert.Equal(expected.Items.First().Status.ToString(), result.Items.First().Status);
         _repoMock.Verify(m => m.ListAsync(page, size, CancellationToken.None), Times.Once);
     }
 
@@ -83,36 +91,36 @@ public sealed class OrdersHandlersTests
     public async Task CreateOrder_Forwards_ToRepository()
     {
         var dto = new CreateOrderDto { PersonId = Guid.NewGuid(), Status = "Pending" };
-        var expected = new OrderDto { Id = Guid.NewGuid(), PersonId = dto.PersonId, Status = dto.Status };
-
         _repoMock
-            .Setup(m => m.AddAsync(dto, CancellationToken.None))
-            .ReturnsAsync(expected);
+            .Setup(m => m.AddAsync(It.IsAny<Order>(), CancellationToken.None))
+            .ReturnsAsync((Order o, CancellationToken _) => Order.FromExisting(o.Id, o.PersonId, o.Status));
 
         var handler = new CreateOrder(_repoMock.Object);
 
         var result = await handler.CreateAsync(dto, CancellationToken.None);
 
-        Assert.Same(expected, result);
-        _repoMock.Verify(m => m.AddAsync(dto, CancellationToken.None), Times.Once);
+        Assert.Equal(dto.PersonId, result.PersonId);
+        Assert.Equal(dto.Status, result.Status);
+        _repoMock.Verify(m => m.AddAsync(It.Is<Order>(o => o.PersonId == dto.PersonId && o.Status == OrderStatus.Pending), CancellationToken.None), Times.Once);
     }
 
     [Fact]
     public async Task UpdateOrder_Forwards_ToRepository()
     {
         var orderId = Guid.NewGuid();
-        var dto = new UpdateOrderDto { Status = "Shipped" };
-        var expected = new OrderDto { Id = orderId, PersonId = Guid.NewGuid(), Status = dto.Status };
+        var dto = new UpdateOrderDto { Status = "Completed" };
+        var expected = Order.FromExisting(orderId, Guid.NewGuid(), OrderStatus.Completed);
 
         _repoMock
-            .Setup(m => m.UpdateAsync(orderId, dto, CancellationToken.None))
+            .Setup(m => m.UpdateStatusAsync(orderId, OrderStatus.Completed, CancellationToken.None))
             .ReturnsAsync(expected);
 
         var handler = new UpdateOrder(_repoMock.Object);
 
         var result = await handler.UpdateAsync(orderId, dto, CancellationToken.None);
 
-        Assert.Same(expected, result);
-        _repoMock.Verify(m => m.UpdateAsync(orderId, dto, CancellationToken.None), Times.Once);
+        Assert.Equal(expected.Id, result.Id);
+        Assert.Equal(expected.Status.ToString(), result.Status);
+        _repoMock.Verify(m => m.UpdateStatusAsync(orderId, OrderStatus.Completed, CancellationToken.None), Times.Once);
     }
 }
