@@ -1,5 +1,3 @@
-using System;
-using SolidApiExample.Application.Orders;
 using SolidApiExample.Application.Validation;
 
 namespace SolidApiExample.Application.Orders.UpdateOrder;

@@ -1,5 +1,3 @@
-using System;
-using SolidApiExample.Application.Orders;
 
 namespace SolidApiExample.Application.Orders.Shared;
 

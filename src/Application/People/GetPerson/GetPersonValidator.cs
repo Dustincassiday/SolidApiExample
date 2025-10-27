@@ -1,4 +1,3 @@
-using System;
 using SolidApiExample.Application.Validation;
 
 namespace SolidApiExample.Application.People.GetPerson;
