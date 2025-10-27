@@ -1,6 +1,7 @@
 using SolidApiExample.Application.Repositories;
 using SolidApiExample.Application.Shared;
 using SolidApiExample.Domain.Customers;
+using SolidApiExample.Domain.Shared;
 
 namespace SolidApiExample.Infrastructure.Repositories.InMemory;
 
@@ -16,7 +17,7 @@ public sealed class InMemoryCustomersRepo : ICustomersRepo
         var items = _customers
             .Skip(page * size)
             .Take(size)
-            .Select(p => Customer.FromExisting(p.Id, p.Name))
+            .Select(p => Customer.FromExisting(p.Id, p.Name, p.Email))
             .ToList();
 
         return Task.FromResult(new Paged<Customer>
@@ -30,15 +31,16 @@ public sealed class InMemoryCustomersRepo : ICustomersRepo
 
     public Task<Customer> AddAsync(Customer customer, CancellationToken ct)
     {
-        var stored = Customer.FromExisting(customer.Id, customer.Name);
+        var stored = Customer.FromExisting(customer.Id, customer.Name, customer.Email);
         _customers.Add(stored);
         return Task.FromResult(stored);
     }
 
-    public async Task<Customer> UpdateNameAsync(Guid id, string name, CancellationToken ct)
+    public async Task<Customer> UpdateAsync(Guid id, string name, Email email, CancellationToken ct)
     {
         var customer = await FindAsync(id, ct) ?? throw new KeyNotFoundException("Customer not found");
         customer.Rename(name);
+        customer.UpdateEmail(email);
         return customer;
     }
     public async Task DeleteAsync(Guid id, CancellationToken ct)

@@ -14,4 +14,9 @@ public sealed class CustomerDto
     /// Display name for the customer.
     /// </summary>
     public required string Name { get; set; }
+
+    /// <summary>
+    /// Email address for the customer.
+    /// </summary>
+    public required string Email { get; set; }
 }

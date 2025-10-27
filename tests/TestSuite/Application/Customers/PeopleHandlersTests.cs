@@ -8,6 +8,7 @@ using SolidApiExample.Application.Customers.UpdateCustomer;
 using SolidApiExample.Application.Repositories;
 using SolidApiExample.Application.Shared;
 using SolidApiExample.Domain.Customers;
+using SolidApiExample.Domain.Shared;
 
 namespace SolidApiExample.TestSuite.Application.Customers;
 
@@ -19,7 +20,7 @@ public sealed class CustomersHandlersTests
     public async Task GetCustomer_Returns_Customer_WhenFound()
     {
         var customerId = Guid.NewGuid();
-        var expected = Customer.FromExisting(customerId, "Ada Lovelace");
+        var expected = Customer.FromExisting(customerId, "Ada Lovelace", Email.Create("ada@example.com"));
 
         _repoMock
             .Setup(m => m.FindAsync(customerId, CancellationToken.None))
@@ -31,6 +32,7 @@ public sealed class CustomersHandlersTests
 
         Assert.Equal(expected.Id, result.Id);
         Assert.Equal(expected.Name, result.Name);
+        Assert.Equal(expected.Email.Value, result.Email);
         _repoMock.Verify(m => m.FindAsync(customerId, CancellationToken.None), Times.Once);
     }
 
@@ -59,7 +61,7 @@ public sealed class CustomersHandlersTests
         {
             Items = new List<Customer>
             {
-                Customer.FromExisting(Guid.NewGuid(), "Grace Hopper")
+                Customer.FromExisting(Guid.NewGuid(), "Grace Hopper", Email.Create("grace@example.com"))
             },
             Page = page,
             Size = size,
@@ -79,34 +81,40 @@ public sealed class CustomersHandlersTests
         Assert.Equal(expected.Size, result.Size);
         Assert.Single(result.Items);
         Assert.Equal(expected.Items.First().Name, result.Items.First().Name);
+        Assert.Equal(expected.Items.First().Email.Value, result.Items.First().Email);
         _repoMock.Verify(m => m.ListAsync(page, size, CancellationToken.None), Times.Once);
     }
 
     [Fact]
     public async Task CreateCustomer_Forwards_ToRepository()
     {
-        var dto = new CreateCustomerDto { Name = "Alan Turing" };
+        var dto = new CreateCustomerDto { Name = "Alan Turing", Email = "alan@example.com" };
         _repoMock
             .Setup(m => m.AddAsync(It.IsAny<Customer>(), CancellationToken.None))
-            .ReturnsAsync((Customer p, CancellationToken _) => Customer.FromExisting(p.Id, p.Name));
+            .ReturnsAsync((Customer p, CancellationToken _) => Customer.FromExisting(p.Id, p.Name, p.Email));
 
         var handler = new CreateCustomerHandler(_repoMock.Object);
 
         var result = await handler.Handle(new CreateCustomerCommand(dto), CancellationToken.None);
 
         Assert.Equal(dto.Name, result.Name);
-        _repoMock.Verify(m => m.AddAsync(It.Is<Customer>(p => p.Name == dto.Name), CancellationToken.None), Times.Once);
+        Assert.Equal(dto.Email, result.Email);
+        _repoMock.Verify(
+            m => m.AddAsync(
+                It.Is<Customer>(p => p.Name == dto.Name && p.Email.Value == dto.Email),
+                CancellationToken.None),
+            Times.Once);
     }
 
     [Fact]
     public async Task UpdateCustomer_Forwards_ToRepository()
     {
         var customerId = Guid.NewGuid();
-        var dto = new UpdateCustomerDto { Name = "Updated Name" };
-        var expected = Customer.FromExisting(customerId, dto.Name);
+        var dto = new UpdateCustomerDto { Name = "Updated Name", Email = "updated@example.com" };
+        var expected = Customer.FromExisting(customerId, dto.Name, Email.Create(dto.Email));
 
         _repoMock
-            .Setup(m => m.UpdateNameAsync(customerId, dto.Name, CancellationToken.None))
+            .Setup(m => m.UpdateAsync(customerId, dto.Name, It.IsAny<Email>(), CancellationToken.None))
             .ReturnsAsync(expected);
 
         var handler = new UpdateCustomerHandler(_repoMock.Object);
@@ -115,7 +123,14 @@ public sealed class CustomersHandlersTests
 
         Assert.Equal(expected.Id, result.Id);
         Assert.Equal(expected.Name, result.Name);
-        _repoMock.Verify(m => m.UpdateNameAsync(customerId, dto.Name, CancellationToken.None), Times.Once);
+        Assert.Equal(expected.Email.Value, result.Email);
+        _repoMock.Verify(
+            m => m.UpdateAsync(
+                customerId,
+                dto.Name,
+                It.Is<Email>(email => email.Value == dto.Email),
+                CancellationToken.None),
+            Times.Once);
     }
 
     [Fact]

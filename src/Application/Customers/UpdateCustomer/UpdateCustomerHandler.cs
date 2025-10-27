@@ -16,7 +16,8 @@ public sealed class UpdateCustomerHandler : IRequestHandler<UpdateCustomerComman
     public async Task<CustomerDto> Handle(UpdateCustomerCommand request, CancellationToken cancellationToken)
     {
         var name = request.Dto.Name.ValidateAndNormalizeName();
-        var updated = await _repo.UpdateNameAsync(request.Id, name, cancellationToken);
+        var email = request.Dto.Email.ValidateAndCreateEmail();
+        var updated = await _repo.UpdateAsync(request.Id, name, email, cancellationToken);
         return updated.ToDto();
     }
 }

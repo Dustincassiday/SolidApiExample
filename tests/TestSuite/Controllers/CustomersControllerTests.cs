@@ -20,7 +20,7 @@ public sealed class CustomersControllerTests
     public async Task Get_ReturnsCustomer_FromHandler()
     {
         var customerId = Guid.NewGuid();
-        var expected = new CustomerDto { Id = customerId, Name = "Ada Lovelace" };
+        var expected = new CustomerDto { Id = customerId, Name = "Ada Lovelace", Email = "ada@example.com" };
         var cancellation = CancellationToken.None;
 
         _mediatorMock
@@ -44,8 +44,8 @@ public sealed class CustomersControllerTests
         var cancellation = CancellationToken.None;
         var customers = new List<CustomerDto>
         {
-            new() { Id = Guid.NewGuid(), Name = "Ada Lovelace" },
-            new() { Id = Guid.NewGuid(), Name = "Alan Turing" }
+            new() { Id = Guid.NewGuid(), Name = "Ada Lovelace", Email = "ada@example.com" },
+            new() { Id = Guid.NewGuid(), Name = "Alan Turing", Email = "alan@example.com" }
         };
         var expected = new Paged<CustomerDto>
         {
@@ -73,8 +73,8 @@ public sealed class CustomersControllerTests
     [Fact]
     public async Task Create_ForwardsRequest_ToHandler()
     {
-        var dto = new CreateCustomerDto { Name = "Grace Hopper" };
-        var expected = new CustomerDto { Id = Guid.NewGuid(), Name = dto.Name };
+        var dto = new CreateCustomerDto { Name = "Grace Hopper", Email = "grace@example.com" };
+        var expected = new CustomerDto { Id = Guid.NewGuid(), Name = dto.Name, Email = dto.Email };
         var cancellation = CancellationToken.None;
 
         _mediatorMock
@@ -96,8 +96,8 @@ public sealed class CustomersControllerTests
     public async Task Update_ForwardsRequest_ToHandler()
     {
         var customerId = Guid.NewGuid();
-        var dto = new UpdateCustomerDto { Name = "Updated Name" };
-        var expected = new CustomerDto { Id = customerId, Name = dto.Name };
+        var dto = new UpdateCustomerDto { Name = "Updated Name", Email = "updated@example.com" };
+        var expected = new CustomerDto { Id = customerId, Name = dto.Name, Email = dto.Email };
         var cancellation = CancellationToken.None;
 
         _mediatorMock

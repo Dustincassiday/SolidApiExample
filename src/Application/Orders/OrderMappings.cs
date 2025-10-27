@@ -12,7 +12,8 @@ internal static class OrderMappings
         {
             Id = order.Id,
             CustomerId = order.CustomerId,
-            Status = order.Status.ToDto()
+            Status = order.Status.ToDto(),
+            Total = order.Total.ToDto()
         };
 
     public static Paged<OrderDto> ToDto(this Paged<Order> orders) =>
@@ -36,19 +37,17 @@ internal static class OrderMappings
 
     public static OrderStatus ToDomain(this OrderStatusDto status) => status switch
     {
-        OrderStatusDto.Pending => OrderStatus.Pending,
-        OrderStatusDto.Processing => OrderStatus.Processing,
-        OrderStatusDto.Completed => OrderStatus.Completed,
-        OrderStatusDto.Cancelled => OrderStatus.Cancelled,
+        OrderStatusDto.New => OrderStatus.New,
+        OrderStatusDto.Paid => OrderStatus.Paid,
+        OrderStatusDto.Shipped => OrderStatus.Shipped,
         _ => throw new ArgumentOutOfRangeException(nameof(status), status, null)
     };
 
     public static OrderStatusDto ToDto(this OrderStatus status) => status switch
     {
-        OrderStatus.Pending => OrderStatusDto.Pending,
-        OrderStatus.Processing => OrderStatusDto.Processing,
-        OrderStatus.Completed => OrderStatusDto.Completed,
-        OrderStatus.Cancelled => OrderStatusDto.Cancelled,
+        OrderStatus.New => OrderStatusDto.New,
+        OrderStatus.Paid => OrderStatusDto.Paid,
+        OrderStatus.Shipped => OrderStatusDto.Shipped,
         _ => throw new ArgumentOutOfRangeException(nameof(status), status, null)
     };
 }

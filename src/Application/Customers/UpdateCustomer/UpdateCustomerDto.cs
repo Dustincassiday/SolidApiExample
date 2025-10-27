@@ -9,4 +9,9 @@ public sealed class UpdateCustomerDto
     /// The customer's updated name.
     /// </summary>
     public required string Name { get; set; }
+
+    /// <summary>
+    /// The customer's updated email address.
+    /// </summary>
+    public required string Email { get; set; }
 }

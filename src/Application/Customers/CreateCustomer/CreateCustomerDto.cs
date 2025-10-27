@@ -9,4 +9,9 @@ public sealed class CreateCustomerDto
     /// The customer's display name.
     /// </summary>
     public required string Name { get; set; }
+
+    /// <summary>
+    /// The customer's email address.
+    /// </summary>
+    public required string Email { get; set; }
 }

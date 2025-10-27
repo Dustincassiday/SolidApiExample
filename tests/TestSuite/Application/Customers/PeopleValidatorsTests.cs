@@ -1,11 +1,8 @@
-using System;
-using System.Linq;
 using SolidApiExample.Application.Customers.CreateCustomer;
 using SolidApiExample.Application.Customers.DeleteCustomer;
 using SolidApiExample.Application.Customers.GetCustomer;
 using SolidApiExample.Application.Customers.ListCustomers;
 using SolidApiExample.Application.Customers.UpdateCustomer;
-using Xunit;
 
 namespace SolidApiExample.TestSuite.Application.Customers;
 
@@ -15,7 +12,7 @@ public sealed class CustomersValidatorsTests
     public void CreateCustomerValidator_ReturnsFailure_WhenNameMissing()
     {
         var validator = new CreateCustomerValidator();
-        var dto = new CreateCustomerDto { Name = " " };
+        var dto = new CreateCustomerDto { Name = " ", Email = "ada@example.com" };
 
         var result = validator.Validate(new CreateCustomerCommand(dto));
 
@@ -24,10 +21,22 @@ public sealed class CustomersValidatorsTests
     }
 
     [Fact]
-    public void CreateCustomerValidator_ReturnsSuccess_WhenNameProvided()
+    public void CreateCustomerValidator_ReturnsFailure_WhenEmailMissing()
     {
         var validator = new CreateCustomerValidator();
-        var dto = new CreateCustomerDto { Name = "Ada Lovelace" };
+        var dto = new CreateCustomerDto { Name = "Ada Lovelace", Email = "" };
+
+        var result = validator.Validate(new CreateCustomerCommand(dto));
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, failure => failure.ErrorMessage == "Email must be provided.");
+    }
+
+    [Fact]
+    public void CreateCustomerValidator_ReturnsSuccess_WhenNameAndEmailProvided()
+    {
+        var validator = new CreateCustomerValidator();
+        var dto = new CreateCustomerDto { Name = "Ada Lovelace", Email = "ada@example.com" };
 
         var result = validator.Validate(new CreateCustomerCommand(dto));
 
@@ -39,7 +48,7 @@ public sealed class CustomersValidatorsTests
     public void UpdateCustomerValidator_ReturnsFailure_WhenNameMissing()
     {
         var validator = new UpdateCustomerValidator();
-        var dto = new UpdateCustomerDto { Name = "" };
+        var dto = new UpdateCustomerDto { Name = "", Email = "ada@example.com" };
 
         var result = validator.Validate(new UpdateCustomerCommand(Guid.NewGuid(), dto));
 
@@ -48,10 +57,22 @@ public sealed class CustomersValidatorsTests
     }
 
     [Fact]
-    public void UpdateCustomerValidator_ReturnsSuccess_WhenNameProvided()
+    public void UpdateCustomerValidator_ReturnsFailure_WhenEmailMissing()
     {
         var validator = new UpdateCustomerValidator();
-        var dto = new UpdateCustomerDto { Name = "Grace Hopper" };
+        var dto = new UpdateCustomerDto { Name = "Grace Hopper", Email = "" };
+
+        var result = validator.Validate(new UpdateCustomerCommand(Guid.NewGuid(), dto));
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, failure => failure.ErrorMessage == "Email must be provided.");
+    }
+
+    [Fact]
+    public void UpdateCustomerValidator_ReturnsSuccess_WhenNameAndEmailProvided()
+    {
+        var validator = new UpdateCustomerValidator();
+        var dto = new UpdateCustomerDto { Name = "Grace Hopper", Email = "grace@example.com" };
 
         var result = validator.Validate(new UpdateCustomerCommand(Guid.NewGuid(), dto));
 

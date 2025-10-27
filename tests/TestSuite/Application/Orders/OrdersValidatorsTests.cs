@@ -1,9 +1,9 @@
-using System.Linq;
 using SolidApiExample.Application.Orders;
 using SolidApiExample.Application.Orders.CreateOrder;
 using SolidApiExample.Application.Orders.GetOrder;
 using SolidApiExample.Application.Orders.ListOrders;
 using SolidApiExample.Application.Orders.UpdateOrder;
+using SolidApiExample.Application.Shared;
 
 namespace SolidApiExample.TestSuite.Application.Orders;
 
@@ -13,7 +13,11 @@ public sealed class OrdersValidatorsTests
     public void CreateOrderValidator_ReturnsFailure_WhenCustomerIdIsEmpty()
     {
         var validator = new CreateOrderValidator();
-        var dto = new CreateOrderDto { CustomerId = Guid.Empty, Status = OrderStatusDto.Pending };
+        var dto = new CreateOrderDto
+        {
+            CustomerId = Guid.Empty,
+            Total = new MoneyDto { Amount = 10m, Currency = "USD" }
+        };
 
         var result = validator.Validate(new CreateOrderCommand(dto));
 
@@ -22,22 +26,58 @@ public sealed class OrdersValidatorsTests
     }
 
     [Fact]
-    public void CreateOrderValidator_ReturnsFailure_WhenStatusInvalid()
+    public void CreateOrderValidator_ReturnsFailure_WhenTotalMissing()
     {
         var validator = new CreateOrderValidator();
-        var dto = new CreateOrderDto { CustomerId = Guid.NewGuid(), Status = (OrderStatusDto)999 };
+        var dto = new CreateOrderDto { CustomerId = Guid.NewGuid(), Total = null! };
 
         var result = validator.Validate(new CreateOrderCommand(dto));
 
         Assert.False(result.IsValid);
-        Assert.Contains(result.Errors, failure => failure.ErrorMessage == "Status must be provided.");
+        Assert.Contains(result.Errors, failure => failure.ErrorMessage == "Total must be provided.");
+    }
+
+    [Fact]
+    public void CreateOrderValidator_ReturnsFailure_WhenAmountNegative()
+    {
+        var validator = new CreateOrderValidator();
+        var dto = new CreateOrderDto
+        {
+            CustomerId = Guid.NewGuid(),
+            Total = new MoneyDto { Amount = -1m, Currency = "USD" }
+        };
+
+        var result = validator.Validate(new CreateOrderCommand(dto));
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, failure => failure.ErrorMessage == "Total amount cannot be negative.");
+    }
+
+    [Fact]
+    public void CreateOrderValidator_ReturnsFailure_WhenCurrencyInvalid()
+    {
+        var validator = new CreateOrderValidator();
+        var dto = new CreateOrderDto
+        {
+            CustomerId = Guid.NewGuid(),
+            Total = new MoneyDto { Amount = 1m, Currency = "US" }
+        };
+
+        var result = validator.Validate(new CreateOrderCommand(dto));
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, failure => failure.ErrorMessage == "Total currency must be a three-letter code.");
     }
 
     [Fact]
     public void CreateOrderValidator_ReturnsSuccess_ForValidRequest()
     {
         var validator = new CreateOrderValidator();
-        var dto = new CreateOrderDto { CustomerId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
+        var dto = new CreateOrderDto
+        {
+            CustomerId = Guid.NewGuid(),
+            Total = new MoneyDto { Amount = 10m, Currency = "USD" }
+        };
 
         var result = validator.Validate(new CreateOrderCommand(dto));
 
@@ -49,7 +89,7 @@ public sealed class OrdersValidatorsTests
     public void UpdateOrderValidator_ReturnsSuccess_WhenStatusProvided()
     {
         var validator = new UpdateOrderValidator();
-        var dto = new UpdateOrderDto { Status = OrderStatusDto.Completed };
+        var dto = new UpdateOrderDto { Status = OrderStatusDto.Paid };
 
         var result = validator.Validate(new UpdateOrderCommand(Guid.NewGuid(), dto));
 

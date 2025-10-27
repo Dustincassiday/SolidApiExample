@@ -3,6 +3,7 @@ using SolidApiExample.Application.Customers.Shared;
 using SolidApiExample.Application.Shared;
 using SolidApiExample.Application.Validation;
 using SolidApiExample.Domain.Customers;
+using SolidApiExample.Domain.Shared;
 
 namespace SolidApiExample.Application.Customers;
 
@@ -12,7 +13,8 @@ internal static class CustomersMappings
         new()
         {
             Id = customer.Id,
-            Name = customer.Name
+            Name = customer.Name,
+            Email = customer.Email.Value
         };
 
     public static Paged<CustomerDto> ToDto(this Paged<Customer> customers) =>
@@ -28,7 +30,12 @@ internal static class CustomersMappings
     {
         try
         {
-            return Customer.Create(dto.Name);
+            var email = dto.Email.ValidateAndCreateEmail();
+            return Customer.Create(dto.Name, email);
+        }
+        catch (ArgumentNullException ex)
+        {
+            throw new ValidationException(new[] { ex.Message });
         }
         catch (ArgumentException ex)
         {
@@ -44,5 +51,17 @@ internal static class CustomersMappings
         }
 
         return name.Trim();
+    }
+
+    public static Email ValidateAndCreateEmail(this string email)
+    {
+        try
+        {
+            return Email.Create(email);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new ValidationException(new[] { ex.Message });
+        }
     }
 }

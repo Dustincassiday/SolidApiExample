@@ -20,7 +20,13 @@ public sealed class OrdersControllerTests
     public async Task Get_ReturnsOrder_FromHandler()
     {
         var orderId = Guid.NewGuid();
-        var expected = new OrderDto { Id = orderId, CustomerId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
+        var expected = new OrderDto
+        {
+            Id = orderId,
+            CustomerId = Guid.NewGuid(),
+            Status = OrderStatusDto.Paid,
+            Total = new MoneyDto { Amount = 15m, Currency = "USD" }
+        };
         var cancellation = CancellationToken.None;
 
         _mediatorMock
@@ -44,8 +50,20 @@ public sealed class OrdersControllerTests
         var cancellation = CancellationToken.None;
         var orders = new List<OrderDto>
         {
-            new() { Id = Guid.NewGuid(), CustomerId = Guid.NewGuid(), Status = OrderStatusDto.Pending },
-            new() { Id = Guid.NewGuid(), CustomerId = Guid.NewGuid(), Status = OrderStatusDto.Completed }
+            new()
+            {
+                Id = Guid.NewGuid(),
+                CustomerId = Guid.NewGuid(),
+                Status = OrderStatusDto.New,
+                Total = new MoneyDto { Amount = 10m, Currency = "USD" }
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                CustomerId = Guid.NewGuid(),
+                Status = OrderStatusDto.Shipped,
+                Total = new MoneyDto { Amount = 20m, Currency = "USD" }
+            }
         };
         var expected = new Paged<OrderDto>
         {
@@ -73,8 +91,18 @@ public sealed class OrdersControllerTests
     [Fact]
     public async Task Create_ForwardsRequest_ToHandler()
     {
-        var dto = new CreateOrderDto { CustomerId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
-        var expected = new OrderDto { Id = Guid.NewGuid(), CustomerId = dto.CustomerId, Status = dto.Status };
+        var dto = new CreateOrderDto
+        {
+            CustomerId = Guid.NewGuid(),
+            Total = new MoneyDto { Amount = 25m, Currency = "USD" }
+        };
+        var expected = new OrderDto
+        {
+            Id = Guid.NewGuid(),
+            CustomerId = dto.CustomerId,
+            Status = OrderStatusDto.New,
+            Total = dto.Total
+        };
         var cancellation = CancellationToken.None;
 
         _mediatorMock
@@ -96,8 +124,14 @@ public sealed class OrdersControllerTests
     public async Task Update_ForwardsRequest_ToHandler()
     {
         var orderId = Guid.NewGuid();
-        var dto = new UpdateOrderDto { Status = OrderStatusDto.Completed };
-        var expected = new OrderDto { Id = orderId, CustomerId = Guid.NewGuid(), Status = dto.Status };
+        var dto = new UpdateOrderDto { Status = OrderStatusDto.Paid };
+        var expected = new OrderDto
+        {
+            Id = orderId,
+            CustomerId = Guid.NewGuid(),
+            Status = dto.Status,
+            Total = new MoneyDto { Amount = 5m, Currency = "USD" }
+        };
         var cancellation = CancellationToken.None;
 
         _mediatorMock

@@ -1,3 +1,5 @@
+using SolidApiExample.Application.Shared;
+
 namespace SolidApiExample.Application.Orders.Shared;
 
 /// <summary>
@@ -19,4 +21,9 @@ public sealed class OrderDto
     /// Current status of the order.
     /// </summary>
     public required OrderStatusDto Status { get; set; }
+
+    /// <summary>
+    /// Total amount charged for the order.
+    /// </summary>
+    public required MoneyDto Total { get; set; }
 }

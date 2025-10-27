@@ -34,7 +34,11 @@ public sealed class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task CreateOrder_ThenRetrieve_PersistsOrder()
     {
         // Arrange
-        var createPayload = new { CustomerId = Guid.NewGuid(), Status = "Pending" };
+        var createPayload = new
+        {
+            CustomerId = Guid.NewGuid(),
+            Total = new { Amount = 19.99m, Currency = "USD" }
+        };
 
         // Act
         var createResponse = await _client.PostAsJsonAsync("/api/orders", createPayload);
@@ -44,21 +48,23 @@ public sealed class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
         var created = await createResponse.Content.ReadFromJsonAsync<OrderDto>();
         Assert.NotNull(created);
         Assert.Equal(createPayload.CustomerId, created!.CustomerId);
-        Assert.Equal(OrderStatusDto.Pending, created.Status);
+        Assert.Equal(OrderStatusDto.New, created.Status);
+        Assert.Equal(createPayload.Total.Amount, created.Total.Amount);
+        Assert.Equal(createPayload.Total.Currency, created.Total.Currency);
 
         var getResponse = await _client.GetAsync($"/api/orders/{created.Id}");
         getResponse.EnsureSuccessStatusCode();
         var fetched = await getResponse.Content.ReadFromJsonAsync<OrderDto>();
         Assert.NotNull(fetched);
         Assert.Equal(created.Id, fetched!.Id);
-        Assert.Equal(OrderStatusDto.Pending, fetched.Status);
+        Assert.Equal(OrderStatusDto.New, fetched.Status);
     }
 
     [Fact]
     public async Task CreateCustomer_ThenRetrieve_PersistsCustomer()
     {
         // Arrange
-        var createPayload = new { Name = "Ada Lovelace" };
+        var createPayload = new { Name = "Ada Lovelace", Email = "ada@example.com" };
 
         // Act
         var createResponse = await _client.PostAsJsonAsync("/api/customers", createPayload);
@@ -68,6 +74,7 @@ public sealed class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
         var created = await createResponse.Content.ReadFromJsonAsync<CustomerDto>();
         Assert.NotNull(created);
         Assert.Equal("Ada Lovelace", created!.Name);
+        Assert.Equal("ada@example.com", created.Email);
 
         // Verify retrieval
         var getResponse = await _client.GetAsync($"/api/customers/{created.Id}");
@@ -76,6 +83,7 @@ public sealed class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.NotNull(fetched);
         Assert.Equal(created.Id, fetched!.Id);
         Assert.Equal("Ada Lovelace", fetched.Name);
+        Assert.Equal("ada@example.com", fetched.Email);
     }
 
     [Fact]

@@ -1,6 +1,6 @@
 using SolidApiExample.Infrastructure.Repositories.InMemory;
 using SolidApiExample.Domain.Customers;
-
+using SolidApiExample.Domain.Shared;
 
 namespace SolidApiExample.TestSuite.Infrastructure.Repositories;
 
@@ -12,12 +12,13 @@ public sealed class InMemoryCustomersRepoTests
     [Fact]
     public async Task AddAsync_AssignsIdAndPersistsCustomer()
     {
-        var create = Customer.Create("Ada Lovelace");
+        var create = Customer.Create("Ada Lovelace", Email.Create("ada@example.com"));
 
         var customer = await _repo.AddAsync(create, _ct);
 
         Assert.NotEqual(Guid.Empty, customer.Id);
         Assert.Equal(create.Name, customer.Name);
+        Assert.Equal(create.Email, customer.Email);
 
         var found = await _repo.FindAsync(customer.Id, _ct);
         Assert.Same(customer, found);
@@ -26,8 +27,8 @@ public sealed class InMemoryCustomersRepoTests
     [Fact]
     public async Task ListAsync_ReturnsPagedCustomers()
     {
-        await _repo.AddAsync(Customer.Create("Ada Lovelace"), _ct);
-        await _repo.AddAsync(Customer.Create("Grace Hopper"), _ct);
+        await _repo.AddAsync(Customer.Create("Ada Lovelace", Email.Create("ada@example.com")), _ct);
+        await _repo.AddAsync(Customer.Create("Grace Hopper", Email.Create("grace@example.com")), _ct);
 
         var page = await _repo.ListAsync(page: 0, size: 1, _ct);
 
@@ -40,26 +41,28 @@ public sealed class InMemoryCustomersRepoTests
     [Fact]
     public async Task UpdateAsync_ChangesExistingCustomer()
     {
-        var customer = await _repo.AddAsync(Customer.Create("Ada Lovelace"), _ct);
+        var customer = await _repo.AddAsync(Customer.Create("Ada Lovelace", Email.Create("ada@example.com")), _ct);
         var updateName = "Ada King";
+        var updateEmail = Email.Create("ada.king@example.com");
 
-        var updated = await _repo.UpdateNameAsync(customer.Id, updateName, _ct);
+        var updated = await _repo.UpdateAsync(customer.Id, updateName, updateEmail, _ct);
 
         Assert.Equal(customer.Id, updated.Id);
         Assert.Equal("Ada King", updated.Name);
+        Assert.Equal(updateEmail, updated.Email);
     }
 
     [Fact]
     public async Task UpdateAsync_Throws_WhenCustomerMissing()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _repo.UpdateNameAsync(Guid.NewGuid(), "Alan Turing", _ct));
+            _repo.UpdateAsync(Guid.NewGuid(), "Alan Turing", Email.Create("alan@example.com"), _ct));
     }
 
     [Fact]
     public async Task DeleteAsync_RemovesCustomer()
     {
-        var customer = await _repo.AddAsync(Customer.Create("Grace Hopper"), _ct);
+        var customer = await _repo.AddAsync(Customer.Create("Grace Hopper", Email.Create("grace@example.com")), _ct);
 
         await _repo.DeleteAsync(customer.Id, _ct);
 
