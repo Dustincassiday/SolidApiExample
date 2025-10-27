@@ -9,7 +9,10 @@ public sealed class InMemoryOrdersRepo : IOrdersRepo
     private readonly List<Order> _orders = new();
 
     public Task<Order?> FindAsync(Guid id, CancellationToken ct) =>
-        Task.FromResult(_orders.FirstOrDefault(o => o.Id == id));
+        Task.FromResult(
+            _orders.FirstOrDefault(o => o.Id == id) is { } order
+                ? Order.FromExisting(order.Id, order.CustomerId, order.Status, order.Total)
+                : null);
 
     public Task<Paged<Order>> ListAsync(int page, int size, CancellationToken ct)
     {
@@ -30,6 +33,11 @@ public sealed class InMemoryOrdersRepo : IOrdersRepo
 
     public Task<Order> AddAsync(Order order, CancellationToken ct)
     {
+        if (_orders.Any(existing => existing.Id == order.Id))
+        {
+            throw new InvalidOperationException("Order with the same id already exists.");
+        }
+
         var stored = Order.FromExisting(order.Id, order.CustomerId, order.Status, order.Total);
         _orders.Add(stored);
         return Task.FromResult(stored);

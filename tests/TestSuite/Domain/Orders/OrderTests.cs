@@ -72,6 +72,16 @@ public sealed class OrderTests
     }
 
     [Fact]
+    public void UpdateStatus_Throws_WhenRevertingFromShipped()
+    {
+        var order = Order.Create(Guid.NewGuid(), Money.Create(10m, "USD"));
+        order.UpdateStatus(OrderStatus.Paid);
+        order.UpdateStatus(OrderStatus.Shipped);
+
+        Assert.Throws<InvalidOperationException>(() => order.UpdateStatus(OrderStatus.Paid));
+    }
+
+    [Fact]
     public void UpdateStatus_Throws_WhenRevertingToNew()
     {
         var order = Order.Create(Guid.NewGuid(), Money.Create(10m, "USD"));
@@ -101,5 +111,15 @@ public sealed class OrderTests
         order.UpdateStatus(OrderStatus.Paid);
 
         Assert.Equal(OrderStatus.Paid, order.Status);
+    }
+
+    [Fact]
+    public void UpdateStatus_AllowsIdempotentNew()
+    {
+        var order = Order.Create(Guid.NewGuid(), Money.Create(10m, "USD"));
+
+        order.UpdateStatus(OrderStatus.New);
+
+        Assert.Equal(OrderStatus.New, order.Status);
     }
 }
