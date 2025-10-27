@@ -18,7 +18,7 @@ env:
   COVERAGE_DIR: TestResults/coverage
 
 jobs:
-  quality:
+  main:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -85,8 +85,13 @@ jobs:
 
       - name: Convert Coverage to Sonar Format
         run: |
+          coverage_report="$(find "$COVERAGE_DIR" -maxdepth 2 -name '*.cobertura.xml' -print -quit)"
+          if [ -z "$coverage_report" ]; then
+            echo "Coverage report not found in $COVERAGE_DIR" >&2
+            exit 1
+          fi
           reportgenerator \
-            -reports:"$COVERAGE_DIR/coverage.cobertura.xml" \
+            -reports:"$coverage_report" \
             -targetdir:"$COVERAGE_DIR/report" \
             -reporttypes:SonarQube
 
@@ -101,7 +106,7 @@ jobs:
         with:
           name: coverage
           path: |
-            ${{ env.COVERAGE_DIR }}/coverage.cobertura.xml
+            ${{ env.COVERAGE_DIR }}/**/*.cobertura.xml
             ${{ env.COVERAGE_DIR }}/report/SonarQube.xml
 
       - name: Upload TRX on Failure
