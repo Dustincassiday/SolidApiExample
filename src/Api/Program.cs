@@ -1,15 +1,14 @@
 using MediatR;
+using System.Reflection;
 using SolidApiExample.Api.Errors;
 using SolidApiExample.Application.Orders.CreateOrder;
 using SolidApiExample.Application.Orders.GetOrder;
 using SolidApiExample.Application.Orders.ListOrders;
-using SolidApiExample.Application.Orders.Shared;
 using SolidApiExample.Application.Orders.UpdateOrder;
 using SolidApiExample.Application.People.CreatePerson;
 using SolidApiExample.Application.People.DeletePerson;
 using SolidApiExample.Application.People.GetPerson;
 using SolidApiExample.Application.People.ListPeople;
-using SolidApiExample.Application.People.Shared;
 using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Application.Pipeline;
 using SolidApiExample.Application.Repositories;
@@ -66,6 +65,10 @@ public class Program
                     Array.Empty<string>()
                 }
             });
+
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            options.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
         });
         services.AddProblemDetails();
         services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
