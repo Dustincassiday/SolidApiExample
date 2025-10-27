@@ -44,4 +44,20 @@ public sealed class CustomerTests
 
         Assert.Equal(newEmail, customer.Email);
     }
+
+    [Fact]
+    public void Create_TrimsName()
+    {
+        var customer = Customer.Create("  Ada ", Email.Create("ada@example.com"));
+
+        Assert.Equal("Ada", customer.Name);
+    }
+
+    [Fact]
+    public void FromExisting_TrimsName()
+    {
+        var customer = Customer.FromExisting(Guid.NewGuid(), "  Ada ", Email.Create("ada@example.com"));
+
+        Assert.Equal("Ada", customer.Name);
+    }
 }

@@ -60,6 +60,24 @@ public sealed class MoneyTests
     }
 
     [Fact]
+    public void HasSameCurrency_IsCaseInsensitive()
+    {
+        var left = Money.Create(5m, "usd");
+        var right = Money.Create(1m, "USD");
+
+        Assert.True(left.HasSameCurrency(right));
+    }
+
+    [Fact]
+    public void HasSameCurrency_ReturnsFalse_WhenDifferent()
+    {
+        var left = Money.Create(5m, "USD");
+        var right = Money.Create(5m, "EUR");
+
+        Assert.False(left.HasSameCurrency(right));
+    }
+
+    [Fact]
     public void Subtract_ReturnsDifference_WhenEnoughAmount()
     {
         var left = Money.Create(5m, "USD");
@@ -86,5 +104,13 @@ public sealed class MoneyTests
         var right = Money.Create(3m, "EUR");
 
         Assert.Throws<InvalidOperationException>(() => left.Subtract(right));
+    }
+
+    [Fact]
+    public void ToString_ReturnsCurrencyAndAmount()
+    {
+        var money = Money.Create(3.1m, "usd");
+
+        Assert.Equal("USD 3.10", money.ToString());
     }
 }

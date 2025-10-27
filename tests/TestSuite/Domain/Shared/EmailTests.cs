@@ -23,4 +23,12 @@ public sealed class EmailTests
     {
         Assert.Throws<ArgumentException>(() => Email.Create("not-an-email"));
     }
+
+    [Fact]
+    public void ToString_ReturnsUnderlyingValue()
+    {
+        var email = Email.Create("ada@example.com");
+
+        Assert.Equal("ada@example.com", email.ToString());
+    }
 }

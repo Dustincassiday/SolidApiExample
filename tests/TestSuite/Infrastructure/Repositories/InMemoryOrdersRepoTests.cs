@@ -22,7 +22,12 @@ public sealed class InMemoryOrdersRepoTests
         Assert.Equal(create.Total, order.Total);
 
         var found = await _repo.FindAsync(order.Id, _ct);
-        Assert.Same(order, found);
+        Assert.NotNull(found);
+        Assert.NotSame(order, found);
+        Assert.Equal(order.Id, found!.Id);
+        Assert.Equal(order.CustomerId, found.CustomerId);
+        Assert.Equal(order.Status, found.Status);
+        Assert.Equal(order.Total, found.Total);
     }
 
     [Fact]
@@ -64,5 +69,14 @@ public sealed class InMemoryOrdersRepoTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             _repo.UpdateStatusAsync(order.Id, OrderStatus.Shipped, _ct));
+    }
+
+    [Fact]
+    public async Task AddAsync_Throws_WhenDuplicateId()
+    {
+        var order = await _repo.AddAsync(Order.Create(Guid.NewGuid(), Money.Create(10m, "USD")), _ct);
+        var duplicate = Order.FromExisting(order.Id, order.CustomerId, order.Status, order.Total);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _repo.AddAsync(duplicate, _ct));
     }
 }
