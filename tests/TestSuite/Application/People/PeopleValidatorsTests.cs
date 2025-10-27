@@ -6,7 +6,7 @@ using SolidApiExample.Application.People.ListPeople;
 using SolidApiExample.Application.People.UpdatePerson;
 using Xunit;
 
-namespace SolidApiExample.UnitTests.Application.People;
+namespace SolidApiExample.TestSuite.Application.People;
 
 public sealed class PeopleValidatorsTests
 {

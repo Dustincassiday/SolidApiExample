@@ -9,7 +9,7 @@ using SolidApiExample.Application.Repositories;
 using SolidApiExample.Application.Shared;
 using SolidApiExample.Domain.People;
 
-namespace SolidApiExample.UnitTests.Application.People;
+namespace SolidApiExample.TestSuite.Application.People;
 
 public sealed class PeopleHandlersTests
 {

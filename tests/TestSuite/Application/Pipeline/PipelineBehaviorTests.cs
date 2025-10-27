@@ -3,7 +3,7 @@ using Moq;
 using SolidApiExample.Application.Pipeline;
 using SolidApiExample.Application.Validation;
 
-namespace SolidApiExample.UnitTests.Application.Pipeline;
+namespace SolidApiExample.TestSuite.Application.Pipeline;
 
 public sealed class PipelineBehaviorTests
 {

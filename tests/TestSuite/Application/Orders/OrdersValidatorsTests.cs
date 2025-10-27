@@ -4,7 +4,7 @@ using SolidApiExample.Application.Orders.GetOrder;
 using SolidApiExample.Application.Orders.ListOrders;
 using SolidApiExample.Application.Orders.UpdateOrder;
 
-namespace SolidApiExample.UnitTests.Application.Orders;
+namespace SolidApiExample.TestSuite.Application.Orders;
 
 public sealed class OrdersValidatorsTests
 {

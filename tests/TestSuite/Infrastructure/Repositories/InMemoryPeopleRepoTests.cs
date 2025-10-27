@@ -2,7 +2,7 @@ using SolidApiExample.Infrastructure.Repositories.InMemory;
 using SolidApiExample.Domain.People;
 
 
-namespace SolidApiExample.UnitTests.Infrastructure.Repositories;
+namespace SolidApiExample.TestSuite.Infrastructure.Repositories;
 
 public sealed class InMemoryPeopleRepoTests
 {

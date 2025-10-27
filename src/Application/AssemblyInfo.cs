@@ -1,3 +1,3 @@
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("SolidApiExample.UnitTests")]
+[assembly: InternalsVisibleTo("SolidApiExample.TestSuite")]

@@ -10,7 +10,7 @@ using SolidApiExample.Application.People.Shared;
 using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Application.Shared;
 
-namespace SolidApiExample.UnitTests.Controllers;
+namespace SolidApiExample.TestSuite.Controllers;
 
 public sealed class PeopleControllerTests
 {

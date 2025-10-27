@@ -1,7 +1,7 @@
 
 using SolidApiExample.Domain.People;
 
-namespace SolidApiExample.UnitTests.Domain.People;
+namespace SolidApiExample.TestSuite.Domain.People;
 
 public sealed class PersonTests
 {

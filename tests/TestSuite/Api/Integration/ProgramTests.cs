@@ -9,7 +9,7 @@ using SolidApiExample.Application.Orders;
 using SolidApiExample.Application.People.Shared;
 using SolidApiExample.Api.Auth;
 
-namespace SolidApiExample.UnitTests.Api.Integration;
+namespace SolidApiExample.TestSuite.Api.Integration;
 
 public sealed class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
 {

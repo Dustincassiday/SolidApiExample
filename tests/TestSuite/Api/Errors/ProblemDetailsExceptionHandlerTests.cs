@@ -7,7 +7,7 @@ using Moq;
 using SolidApiExample.Api.Errors;
 using SolidApiExample.Application.Validation;
 
-namespace SolidApiExample.UnitTests.Api.Errors;
+namespace SolidApiExample.TestSuite.Api.Errors;
 
 public sealed class ProblemDetailsExceptionHandlerTests
 {

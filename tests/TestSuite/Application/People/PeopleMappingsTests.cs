@@ -4,7 +4,7 @@ using SolidApiExample.Application.Shared;
 using SolidApiExample.Application.Validation;
 using SolidApiExample.Domain.People;
 
-namespace SolidApiExample.UnitTests.Application.People;
+namespace SolidApiExample.TestSuite.Application.People;
 
 public sealed class PeopleMappingsTests
 {

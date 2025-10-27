@@ -2,7 +2,7 @@
 using SolidApiExample.Domain.Orders;
 
 
-namespace SolidApiExample.UnitTests.Domain.Orders;
+namespace SolidApiExample.TestSuite.Domain.Orders;
 
 public sealed class OrderTests
 {

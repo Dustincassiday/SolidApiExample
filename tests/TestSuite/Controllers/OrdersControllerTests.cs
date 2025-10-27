@@ -10,7 +10,7 @@ using SolidApiExample.Application.Orders.Shared;
 using SolidApiExample.Application.Orders.UpdateOrder;
 using SolidApiExample.Application.Shared;
 
-namespace SolidApiExample.UnitTests.Controllers;
+namespace SolidApiExample.TestSuite.Controllers;
 
 public sealed class OrdersControllerTests
 {

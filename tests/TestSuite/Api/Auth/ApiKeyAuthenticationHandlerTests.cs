@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using SolidApiExample.Api.Auth;
 
-namespace SolidApiExample.UnitTests.Api.Auth;
+namespace SolidApiExample.TestSuite.Api.Auth;
 
 public sealed class ApiKeyAuthenticationHandlerTests
 {
