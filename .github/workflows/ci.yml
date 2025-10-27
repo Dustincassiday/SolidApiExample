@@ -87,7 +87,7 @@ jobs:
         run: |
           echo "Coverage directory contents:"
           ls -R "$COVERAGE_DIR"
-          coverage_report="$(find "$COVERAGE_DIR" -maxdepth 2 -name '*.cobertura.xml' -print -quit)"
+          coverage_report="$(find "$COVERAGE_DIR" -type f -name '*.cobertura.xml' | head -n 1)"
           if [ -z "$coverage_report" ]; then
             echo "Coverage report not found in $COVERAGE_DIR" >&2
             exit 1
