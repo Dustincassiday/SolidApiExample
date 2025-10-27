@@ -12,9 +12,9 @@ public sealed class CustomerTests
     }
 
     [Fact]
-    public void Create_WithInvalidEmail_Throws()
+    public void Create_WithNullEmail_Throws()
     {
-        Assert.Throws<ArgumentException>(() => Customer.Create("Ada", Email.Create("not-an-email")));
+        Assert.Throws<ArgumentNullException>(() => Customer.Create("Ada", null!));
     }
 
     [Fact]
