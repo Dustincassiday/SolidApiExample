@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolidApiExample.Domain", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolidApiExample.Infrastructure", "src\Infrastructure\SolidApiExample.Infrastructure.csproj", "{BFB84600-5BAA-430A-A3A0-2803E0D85D5D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolidApiExample.UnitTests", "tests\UnitTests\SolidApiExample.UnitTests.csproj", "{CE8EE36B-B506-4ABE-9CDE-FE784EABB5D9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolidApiExample.TestSuite", "tests\TestSuite\SolidApiExample.TestSuite.csproj", "{CE8EE36B-B506-4ABE-9CDE-FE784EABB5D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

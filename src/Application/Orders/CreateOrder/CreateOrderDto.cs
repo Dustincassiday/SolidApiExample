@@ -1,3 +1,5 @@
+using SolidApiExample.Application.Shared;
+
 namespace SolidApiExample.Application.Orders.CreateOrder;
 
 /// <summary>
@@ -6,12 +8,12 @@ namespace SolidApiExample.Application.Orders.CreateOrder;
 public sealed class CreateOrderDto
 {
     /// <summary>
-    /// The identifier of the person who owns the order.
+    /// The identifier of the customer who owns the order.
     /// </summary>
-    public required Guid PersonId { get; set; }
+    public required Guid CustomerId { get; set; }
 
     /// <summary>
-    /// The starting status for the order.
+    /// The total charge for the order.
     /// </summary>
-    public required OrderStatusDto Status { get; set; }
+    public required MoneyDto Total { get; set; }
 }

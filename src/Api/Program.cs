@@ -1,3 +1,4 @@
+using FluentValidation;
 using MediatR;
 using System.Reflection;
 using SolidApiExample.Api.Errors;
@@ -5,14 +6,13 @@ using SolidApiExample.Application.Orders.CreateOrder;
 using SolidApiExample.Application.Orders.GetOrder;
 using SolidApiExample.Application.Orders.ListOrders;
 using SolidApiExample.Application.Orders.UpdateOrder;
-using SolidApiExample.Application.People.CreatePerson;
-using SolidApiExample.Application.People.DeletePerson;
-using SolidApiExample.Application.People.GetPerson;
-using SolidApiExample.Application.People.ListPeople;
-using SolidApiExample.Application.People.UpdatePerson;
+using SolidApiExample.Application.Customers.CreateCustomer;
+using SolidApiExample.Application.Customers.DeleteCustomer;
+using SolidApiExample.Application.Customers.GetCustomer;
+using SolidApiExample.Application.Customers.ListCustomers;
+using SolidApiExample.Application.Customers.UpdateCustomer;
 using SolidApiExample.Application.Pipeline;
 using SolidApiExample.Application.Repositories;
-using SolidApiExample.Application.Validation;
 using SolidApiExample.Infrastructure.Repositories.InMemory;
 using SolidApiExample.Api.Auth;
 using Microsoft.OpenApi.Models;
@@ -84,23 +84,23 @@ public class Program
 
         services.AddAuthorization();
 
-        services.AddSingleton<IPeopleRepo, InMemoryPeopleRepo>();
+        services.AddSingleton<ICustomersRepo, InMemoryCustomersRepo>();
         services.AddSingleton<IOrdersRepo, InMemoryOrdersRepo>();
 
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<CreatePersonHandler>());
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<CreateCustomerHandler>());
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
-        services.AddScoped<IRequestValidator<GetPersonQuery>, GetPersonValidator>();
-        services.AddScoped<IRequestValidator<ListPeopleQuery>, ListPeopleValidator>();
-        services.AddScoped<IRequestValidator<CreatePersonCommand>, CreatePersonValidator>();
-        services.AddScoped<IRequestValidator<UpdatePersonCommand>, UpdatePersonValidator>();
-        services.AddScoped<IRequestValidator<DeletePersonCommand>, DeletePersonValidator>();
+        services.AddScoped<IValidator<GetCustomerQuery>, GetCustomerValidator>();
+        services.AddScoped<IValidator<ListCustomersQuery>, ListCustomersValidator>();
+        services.AddScoped<IValidator<CreateCustomerCommand>, CreateCustomerValidator>();
+        services.AddScoped<IValidator<UpdateCustomerCommand>, UpdateCustomerValidator>();
+        services.AddScoped<IValidator<DeleteCustomerCommand>, DeleteCustomerValidator>();
 
-        services.AddScoped<IRequestValidator<GetOrderQuery>, GetOrderValidator>();
-        services.AddScoped<IRequestValidator<ListOrdersQuery>, ListOrdersValidator>();
-        services.AddScoped<IRequestValidator<CreateOrderCommand>, CreateOrderValidator>();
-        services.AddScoped<IRequestValidator<UpdateOrderCommand>, UpdateOrderValidator>();
+        services.AddScoped<IValidator<GetOrderQuery>, GetOrderValidator>();
+        services.AddScoped<IValidator<ListOrdersQuery>, ListOrdersValidator>();
+        services.AddScoped<IValidator<CreateOrderCommand>, CreateOrderValidator>();
+        services.AddScoped<IValidator<UpdateOrderCommand>, UpdateOrderValidator>();
     }
 
     internal static void ConfigurePipeline(WebApplication app)

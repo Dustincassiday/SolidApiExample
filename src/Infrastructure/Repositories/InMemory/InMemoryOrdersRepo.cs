@@ -16,7 +16,7 @@ public sealed class InMemoryOrdersRepo : IOrdersRepo
         var items = _orders
             .Skip(page * size)
             .Take(size)
-            .Select(o => Order.FromExisting(o.Id, o.PersonId, o.Status))
+            .Select(o => Order.FromExisting(o.Id, o.CustomerId, o.Status, o.Total))
             .ToList();
 
         return Task.FromResult(new Paged<Order>
@@ -30,7 +30,7 @@ public sealed class InMemoryOrdersRepo : IOrdersRepo
 
     public Task<Order> AddAsync(Order order, CancellationToken ct)
     {
-        var stored = Order.FromExisting(order.Id, order.PersonId, order.Status);
+        var stored = Order.FromExisting(order.Id, order.CustomerId, order.Status, order.Total);
         _orders.Add(stored);
         return Task.FromResult(stored);
     }

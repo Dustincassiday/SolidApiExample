@@ -2,6 +2,7 @@ using MediatR;
 using SolidApiExample.Application.Orders;
 using SolidApiExample.Application.Orders.Shared;
 using SolidApiExample.Application.Repositories;
+using SolidApiExample.Application.Shared;
 using SolidApiExample.Domain.Orders;
 
 namespace SolidApiExample.Application.Orders.CreateOrder;
@@ -16,7 +17,8 @@ public sealed class CreateOrderHandler : IRequestHandler<CreateOrderCommand, Ord
 
     public async Task<OrderDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        var order = Order.Create(request.Dto.PersonId, request.Dto.Status.ToDomain());
+        var total = request.Dto.Total.ToDomain();
+        var order = Order.Create(request.Dto.CustomerId, total);
         var created = await _repo.AddAsync(order, cancellationToken);
         return created.ToDto();
     }

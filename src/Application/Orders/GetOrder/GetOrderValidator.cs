@@ -1,11 +1,13 @@
-using SolidApiExample.Application.Validation;
+using FluentValidation;
 
 namespace SolidApiExample.Application.Orders.GetOrder;
 
-public sealed class GetOrderValidator : IRequestValidator<GetOrderQuery>
+public sealed class GetOrderValidator : AbstractValidator<GetOrderQuery>
 {
-    public ValidationResult Validate(GetOrderQuery request) =>
-        request.Id == Guid.Empty
-            ? ValidationResult.Failure("Id must be a non-empty GUID.")
-            : ValidationResult.Success;
+    public GetOrderValidator()
+    {
+        RuleFor(request => request.Id)
+            .NotEmpty()
+            .WithMessage("Id must be a non-empty GUID.");
+    }
 }

@@ -1,21 +1,29 @@
-using SolidApiExample.Application.Validation;
+using FluentValidation;
 
 namespace SolidApiExample.Application.Orders.CreateOrder;
 
-public sealed class CreateOrderValidator : IRequestValidator<CreateOrderCommand>
+public sealed class CreateOrderValidator : AbstractValidator<CreateOrderCommand>
 {
-    public ValidationResult Validate(CreateOrderCommand request)
+    public CreateOrderValidator()
     {
-        if (request.Dto.PersonId == Guid.Empty)
-        {
-            return ValidationResult.Failure("PersonId must be a non-empty GUID.");
-        }
+        RuleFor(request => request.Dto.CustomerId)
+            .NotEmpty()
+            .WithMessage("CustomerId must be a non-empty GUID.");
 
-        if (!Enum.IsDefined(typeof(OrderStatusDto), request.Dto.Status))
-        {
-            return ValidationResult.Failure("Status must be provided.");
-        }
+        RuleFor(request => request.Dto.Total)
+            .NotNull()
+            .WithMessage("Total must be provided.");
 
-        return ValidationResult.Success;
+        RuleFor(request => request.Dto.Total.Amount)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("Total amount cannot be negative.")
+            .When(request => request.Dto.Total is not null);
+
+        RuleFor(request => request.Dto.Total.Currency)
+            .NotEmpty()
+            .WithMessage("Total currency must be provided.")
+            .Length(3)
+            .WithMessage("Total currency must be a three-letter code.")
+            .When(request => request.Dto.Total is not null);
     }
 }
