@@ -16,7 +16,7 @@ public sealed class CreateOrderHandler : IRequestHandler<CreateOrderCommand, Ord
 
     public async Task<OrderDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        var order = Order.Create(request.Dto.PersonId, request.Dto.Status.ToDomain());
+        var order = Order.Create(request.Dto.CustomerId, request.Dto.Status.ToDomain());
         var created = await _repo.AddAsync(order, cancellationToken);
         return created.ToDto();
     }

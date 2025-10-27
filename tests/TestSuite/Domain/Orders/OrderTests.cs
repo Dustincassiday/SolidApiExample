@@ -7,7 +7,7 @@ namespace SolidApiExample.TestSuite.Domain.Orders;
 public sealed class OrderTests
 {
     [Fact]
-    public void Create_WithEmptyPersonId_Throws()
+    public void Create_WithEmptyCustomerId_Throws()
     {
         Assert.Throws<ArgumentException>(() => Order.Create(Guid.Empty, OrderStatus.Pending));
     }

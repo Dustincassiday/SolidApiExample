@@ -1,3 +1,4 @@
+using System.Linq;
 using SolidApiExample.Application.Orders;
 using SolidApiExample.Application.Orders.CreateOrder;
 using SolidApiExample.Application.Orders.GetOrder;
@@ -9,34 +10,34 @@ namespace SolidApiExample.TestSuite.Application.Orders;
 public sealed class OrdersValidatorsTests
 {
     [Fact]
-    public void CreateOrderValidator_ReturnsFailure_WhenPersonIdIsEmpty()
+    public void CreateOrderValidator_ReturnsFailure_WhenCustomerIdIsEmpty()
     {
         var validator = new CreateOrderValidator();
-        var dto = new CreateOrderDto { PersonId = Guid.Empty, Status = OrderStatusDto.Pending };
+        var dto = new CreateOrderDto { CustomerId = Guid.Empty, Status = OrderStatusDto.Pending };
 
         var result = validator.Validate(new CreateOrderCommand(dto));
 
         Assert.False(result.IsValid);
-        Assert.Contains("PersonId must be a non-empty GUID.", result.Errors);
+        Assert.Contains(result.Errors, failure => failure.ErrorMessage == "CustomerId must be a non-empty GUID.");
     }
 
     [Fact]
     public void CreateOrderValidator_ReturnsFailure_WhenStatusInvalid()
     {
         var validator = new CreateOrderValidator();
-        var dto = new CreateOrderDto { PersonId = Guid.NewGuid(), Status = (OrderStatusDto)999 };
+        var dto = new CreateOrderDto { CustomerId = Guid.NewGuid(), Status = (OrderStatusDto)999 };
 
         var result = validator.Validate(new CreateOrderCommand(dto));
 
         Assert.False(result.IsValid);
-        Assert.Contains("Status must be provided.", result.Errors);
+        Assert.Contains(result.Errors, failure => failure.ErrorMessage == "Status must be provided.");
     }
 
     [Fact]
     public void CreateOrderValidator_ReturnsSuccess_ForValidRequest()
     {
         var validator = new CreateOrderValidator();
-        var dto = new CreateOrderDto { PersonId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
+        var dto = new CreateOrderDto { CustomerId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
 
         var result = validator.Validate(new CreateOrderCommand(dto));
 
@@ -65,7 +66,7 @@ public sealed class OrdersValidatorsTests
         var result = validator.Validate(new UpdateOrderCommand(Guid.NewGuid(), dto));
 
         Assert.False(result.IsValid);
-        Assert.Contains("Status must be provided.", result.Errors);
+        Assert.Contains(result.Errors, failure => failure.ErrorMessage == "Status must be provided.");
     }
 
     [Fact]
@@ -76,7 +77,7 @@ public sealed class OrdersValidatorsTests
         var result = validator.Validate(new GetOrderQuery(Guid.Empty));
 
         Assert.False(result.IsValid);
-        Assert.Contains("Id must be a non-empty GUID.", result.Errors);
+        Assert.Contains(result.Errors, failure => failure.ErrorMessage == "Id must be a non-empty GUID.");
     }
 
     [Fact]
@@ -98,7 +99,7 @@ public sealed class OrdersValidatorsTests
         var result = validator.Validate(new ListOrdersQuery(-1, 10));
 
         Assert.False(result.IsValid);
-        Assert.Contains("Page must be zero or greater.", result.Errors);
+        Assert.Contains(result.Errors, failure => failure.ErrorMessage == "Page must be zero or greater.");
     }
 
     [Fact]
@@ -109,7 +110,7 @@ public sealed class OrdersValidatorsTests
         var result = validator.Validate(new ListOrdersQuery(0, 0));
 
         Assert.False(result.IsValid);
-        Assert.Contains("Size must be greater than zero.", result.Errors);
+        Assert.Contains(result.Errors, failure => failure.ErrorMessage == "Size must be greater than zero.");
     }
 
     [Fact]

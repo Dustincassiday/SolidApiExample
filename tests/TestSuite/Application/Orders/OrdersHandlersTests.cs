@@ -31,7 +31,7 @@ public sealed class OrdersHandlersTests
         var result = await handler.Handle(new GetOrderQuery(orderId), CancellationToken.None);
 
         Assert.Equal(expected.Id, result.Id);
-        Assert.Equal(expected.PersonId, result.PersonId);
+        Assert.Equal(expected.CustomerId, result.CustomerId);
         Assert.Equal(ToDto(expected.Status), result.Status);
         _repoMock.Verify(m => m.FindAsync(orderId, CancellationToken.None), Times.Once);
     }
@@ -87,18 +87,18 @@ public sealed class OrdersHandlersTests
     [Fact]
     public async Task CreateOrder_Forwards_ToRepository()
     {
-        var dto = new CreateOrderDto { PersonId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
+        var dto = new CreateOrderDto { CustomerId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
         _repoMock
             .Setup(m => m.AddAsync(It.IsAny<Order>(), CancellationToken.None))
-            .ReturnsAsync((Order o, CancellationToken _) => Order.FromExisting(o.Id, o.PersonId, o.Status));
+            .ReturnsAsync((Order o, CancellationToken _) => Order.FromExisting(o.Id, o.CustomerId, o.Status));
 
         var handler = new CreateOrderHandler(_repoMock.Object);
 
         var result = await handler.Handle(new CreateOrderCommand(dto), CancellationToken.None);
 
-        Assert.Equal(dto.PersonId, result.PersonId);
+        Assert.Equal(dto.CustomerId, result.CustomerId);
         Assert.Equal(dto.Status, result.Status);
-        _repoMock.Verify(m => m.AddAsync(It.Is<Order>(o => o.PersonId == dto.PersonId && o.Status == OrderStatus.Pending), CancellationToken.None), Times.Once);
+        _repoMock.Verify(m => m.AddAsync(It.Is<Order>(o => o.CustomerId == dto.CustomerId && o.Status == OrderStatus.Pending), CancellationToken.None), Times.Once);
     }
 
     [Fact]

@@ -1,10 +1,10 @@
 using FluentValidation;
 
-namespace SolidApiExample.Application.Orders.ListOrders;
+namespace SolidApiExample.Application.Customers.ListCustomers;
 
-public sealed class ListOrdersValidator : AbstractValidator<ListOrdersQuery>
+public sealed class ListCustomersValidator : AbstractValidator<ListCustomersQuery>
 {
-    public ListOrdersValidator()
+    public ListCustomersValidator()
     {
         RuleFor(request => request.Page)
             .GreaterThanOrEqualTo(0)

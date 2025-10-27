@@ -11,7 +11,7 @@ internal static class OrderMappings
         new()
         {
             Id = order.Id,
-            PersonId = order.PersonId,
+            CustomerId = order.CustomerId,
             Status = order.Status.ToDto()
         };
 

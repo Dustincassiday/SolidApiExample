@@ -6,9 +6,9 @@ namespace SolidApiExample.Application.Orders.CreateOrder;
 public sealed class CreateOrderDto
 {
     /// <summary>
-    /// The identifier of the person who owns the order.
+    /// The identifier of the customer who owns the order.
     /// </summary>
-    public required Guid PersonId { get; set; }
+    public required Guid CustomerId { get; set; }
 
     /// <summary>
     /// The starting status for the order.

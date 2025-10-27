@@ -20,7 +20,7 @@ public sealed class OrdersControllerTests
     public async Task Get_ReturnsOrder_FromHandler()
     {
         var orderId = Guid.NewGuid();
-        var expected = new OrderDto { Id = orderId, PersonId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
+        var expected = new OrderDto { Id = orderId, CustomerId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
         var cancellation = CancellationToken.None;
 
         _mediatorMock
@@ -44,8 +44,8 @@ public sealed class OrdersControllerTests
         var cancellation = CancellationToken.None;
         var orders = new List<OrderDto>
         {
-            new() { Id = Guid.NewGuid(), PersonId = Guid.NewGuid(), Status = OrderStatusDto.Pending },
-            new() { Id = Guid.NewGuid(), PersonId = Guid.NewGuid(), Status = OrderStatusDto.Completed }
+            new() { Id = Guid.NewGuid(), CustomerId = Guid.NewGuid(), Status = OrderStatusDto.Pending },
+            new() { Id = Guid.NewGuid(), CustomerId = Guid.NewGuid(), Status = OrderStatusDto.Completed }
         };
         var expected = new Paged<OrderDto>
         {
@@ -73,8 +73,8 @@ public sealed class OrdersControllerTests
     [Fact]
     public async Task Create_ForwardsRequest_ToHandler()
     {
-        var dto = new CreateOrderDto { PersonId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
-        var expected = new OrderDto { Id = Guid.NewGuid(), PersonId = dto.PersonId, Status = dto.Status };
+        var dto = new CreateOrderDto { CustomerId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
+        var expected = new OrderDto { Id = Guid.NewGuid(), CustomerId = dto.CustomerId, Status = dto.Status };
         var cancellation = CancellationToken.None;
 
         _mediatorMock
@@ -97,7 +97,7 @@ public sealed class OrdersControllerTests
     {
         var orderId = Guid.NewGuid();
         var dto = new UpdateOrderDto { Status = OrderStatusDto.Completed };
-        var expected = new OrderDto { Id = orderId, PersonId = Guid.NewGuid(), Status = dto.Status };
+        var expected = new OrderDto { Id = orderId, CustomerId = Guid.NewGuid(), Status = dto.Status };
         var cancellation = CancellationToken.None;
 
         _mediatorMock

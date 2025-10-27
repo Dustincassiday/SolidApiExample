@@ -16,7 +16,7 @@ public sealed class InMemoryOrdersRepoTests
         var order = await _repo.AddAsync(create, _ct);
 
         Assert.NotEqual(Guid.Empty, order.Id);
-        Assert.Equal(create.PersonId, order.PersonId);
+        Assert.Equal(create.CustomerId, order.CustomerId);
         Assert.Equal(create.Status, order.Status);
 
         var found = await _repo.FindAsync(order.Id, _ct);

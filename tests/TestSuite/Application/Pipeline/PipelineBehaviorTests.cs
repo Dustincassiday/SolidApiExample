@@ -1,7 +1,8 @@
+using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SolidApiExample.Application.Pipeline;
-using SolidApiExample.Application.Validation;
+using AppValidationException = SolidApiExample.Application.Validation.ValidationException;
 
 namespace SolidApiExample.TestSuite.Application.Pipeline;
 
@@ -11,11 +12,10 @@ public sealed class PipelineBehaviorTests
     public async Task ValidationBehavior_ReturnsNextResult_WhenAllValidatorsPass()
     {
         // Arrange
-        var validators = new[]
-        {
-            Mock.Of<IRequestValidator<string>>(v => v.Validate(It.IsAny<string>()) == ValidationResult.Success)
-        };
-        var behavior = new ValidationBehavior<string, int>(validators);
+        var validator = new InlineValidator<string>();
+        validator.RuleFor(x => x).NotNull();
+
+        var behavior = new ValidationBehavior<string, int>(new[] { validator });
         var expected = 42;
 
         // Act
@@ -29,16 +29,13 @@ public sealed class PipelineBehaviorTests
     public async Task ValidationBehavior_ThrowsValidationException_WhenAnyValidatorFails()
     {
         // Arrange
-        var validators = new[]
-        {
-            Mock.Of<IRequestValidator<string>>(v => v.Validate(It.IsAny<string>()) == ValidationResult.Success),
-            Mock.Of<IRequestValidator<string>>(v => v.Validate(It.IsAny<string>()) ==
-                ValidationResult.Failure("Invalid"))
-        };
-        var behavior = new ValidationBehavior<string, int>(validators);
+        var validator = new InlineValidator<string>();
+        validator.RuleFor(x => x).NotEqual("request").WithMessage("Invalid");
+
+        var behavior = new ValidationBehavior<string, int>(new[] { validator });
 
         // Act & Assert
-        await Assert.ThrowsAsync<ValidationException>(() =>
+        await Assert.ThrowsAsync<AppValidationException>(() =>
             behavior.Handle("request", () => Task.FromResult(0), CancellationToken.None));
     }
 

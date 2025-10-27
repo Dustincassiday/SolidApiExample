@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using SolidApiExample.Api;
 using SolidApiExample.Application.Orders.Shared;
 using SolidApiExample.Application.Orders;
-using SolidApiExample.Application.People.Shared;
+using SolidApiExample.Application.Customers.Shared;
 using SolidApiExample.Api.Auth;
 
 namespace SolidApiExample.TestSuite.Api.Integration;
@@ -34,7 +34,7 @@ public sealed class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task CreateOrder_ThenRetrieve_PersistsOrder()
     {
         // Arrange
-        var createPayload = new { PersonId = Guid.NewGuid(), Status = "Pending" };
+        var createPayload = new { CustomerId = Guid.NewGuid(), Status = "Pending" };
 
         // Act
         var createResponse = await _client.PostAsJsonAsync("/api/orders", createPayload);
@@ -43,7 +43,7 @@ public sealed class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
         createResponse.EnsureSuccessStatusCode();
         var created = await createResponse.Content.ReadFromJsonAsync<OrderDto>();
         Assert.NotNull(created);
-        Assert.Equal(createPayload.PersonId, created!.PersonId);
+        Assert.Equal(createPayload.CustomerId, created!.CustomerId);
         Assert.Equal(OrderStatusDto.Pending, created.Status);
 
         var getResponse = await _client.GetAsync($"/api/orders/{created.Id}");
@@ -55,24 +55,24 @@ public sealed class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task CreatePerson_ThenRetrieve_PersistsPerson()
+    public async Task CreateCustomer_ThenRetrieve_PersistsCustomer()
     {
         // Arrange
         var createPayload = new { Name = "Ada Lovelace" };
 
         // Act
-        var createResponse = await _client.PostAsJsonAsync("/api/people", createPayload);
+        var createResponse = await _client.PostAsJsonAsync("/api/customers", createPayload);
 
         // Assert create
         createResponse.EnsureSuccessStatusCode();
-        var created = await createResponse.Content.ReadFromJsonAsync<PersonDto>();
+        var created = await createResponse.Content.ReadFromJsonAsync<CustomerDto>();
         Assert.NotNull(created);
         Assert.Equal("Ada Lovelace", created!.Name);
 
         // Verify retrieval
-        var getResponse = await _client.GetAsync($"/api/people/{created.Id}");
+        var getResponse = await _client.GetAsync($"/api/customers/{created.Id}");
         getResponse.EnsureSuccessStatusCode();
-        var fetched = await getResponse.Content.ReadFromJsonAsync<PersonDto>();
+        var fetched = await getResponse.Content.ReadFromJsonAsync<CustomerDto>();
         Assert.NotNull(fetched);
         Assert.Equal(created.Id, fetched!.Id);
         Assert.Equal("Ada Lovelace", fetched.Name);
@@ -93,7 +93,7 @@ public sealed class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
             BaseAddress = new Uri("https://localhost")
         });
 
-        var response = await unauthenticatedClient.GetAsync("/api/people");
+        var response = await unauthenticatedClient.GetAsync("/api/customers");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }

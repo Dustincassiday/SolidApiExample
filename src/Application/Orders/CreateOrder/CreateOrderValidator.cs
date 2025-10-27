@@ -1,21 +1,17 @@
-using SolidApiExample.Application.Validation;
+using FluentValidation;
 
 namespace SolidApiExample.Application.Orders.CreateOrder;
 
-public sealed class CreateOrderValidator : IRequestValidator<CreateOrderCommand>
+public sealed class CreateOrderValidator : AbstractValidator<CreateOrderCommand>
 {
-    public ValidationResult Validate(CreateOrderCommand request)
+    public CreateOrderValidator()
     {
-        if (request.Dto.PersonId == Guid.Empty)
-        {
-            return ValidationResult.Failure("PersonId must be a non-empty GUID.");
-        }
+        RuleFor(request => request.Dto.CustomerId)
+            .NotEmpty()
+            .WithMessage("CustomerId must be a non-empty GUID.");
 
-        if (!Enum.IsDefined(typeof(OrderStatusDto), request.Dto.Status))
-        {
-            return ValidationResult.Failure("Status must be provided.");
-        }
-
-        return ValidationResult.Success;
+        RuleFor(request => request.Dto.Status)
+            .IsInEnum()
+            .WithMessage("Status must be provided.");
     }
 }

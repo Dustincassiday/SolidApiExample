@@ -16,7 +16,7 @@ public sealed class OrderMappingsTests
         var dto = order.ToDto();
 
         Assert.Equal(order.Id, dto.Id);
-        Assert.Equal(order.PersonId, dto.PersonId);
+        Assert.Equal(order.CustomerId, dto.CustomerId);
         Assert.Equal(OrderStatusDto.Pending, dto.Status);
     }
 

@@ -1,34 +1,44 @@
+using FluentValidation;
 using MediatR;
-using SolidApiExample.Application.Validation;
+using AppValidationException = SolidApiExample.Application.Validation.ValidationException;
 
 namespace SolidApiExample.Application.Pipeline;
 
 public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    private readonly IEnumerable<IRequestValidator<TRequest>> _validators;
+    private readonly IValidator<TRequest>[] _validators;
 
-    public ValidationBehavior(IEnumerable<IRequestValidator<TRequest>> validators)
+    public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
     {
-        _validators = validators;
+        _validators = validators as IValidator<TRequest>[] ?? validators.ToArray();
     }
 
-    public Task<TResponse> Handle(
+    public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        var failures = _validators
-            .Select(v => v.Validate(request))
-            .Where(result => !result.IsValid)
+        if (_validators.Length == 0)
+        {
+            return await next();
+        }
+
+        var context = new ValidationContext<TRequest>(request);
+        var validationResults = await Task.WhenAll(
+            _validators.Select(v => v.ValidateAsync(context, cancellationToken)));
+
+        var failures = validationResults
             .SelectMany(result => result.Errors)
+            .Where(failure => failure is not null && !string.IsNullOrWhiteSpace(failure.ErrorMessage))
+            .Select(failure => failure!.ErrorMessage)
             .ToArray();
 
         if (failures.Length > 0)
         {
-            throw new ValidationException(failures);
+            throw new AppValidationException(failures);
         }
 
-        return next();
+        return await next();
     }
 }
