@@ -4,6 +4,12 @@ This project is a reference implementation of my .NET architecture approach focu
 
 It models a simple customer and order domain using MediatR for orchestration, strict separation of concerns, and full test coverage from unit to integration.
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Dustincassiday_SolidApiExample&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Dustincassiday_SolidApiExample)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Dustincassiday_SolidApiExample&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Dustincassiday_SolidApiExample)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Dustincassiday_SolidApiExample&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Dustincassiday_SolidApiExample)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Dustincassiday_SolidApiExample&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Dustincassiday_SolidApiExample)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Dustincassiday_SolidApiExample&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Dustincassiday_SolidApiExample)
+
 > Want the big picture view? See the [architecture doc](docs/architecture.md).
 
 ## Table of Contents
