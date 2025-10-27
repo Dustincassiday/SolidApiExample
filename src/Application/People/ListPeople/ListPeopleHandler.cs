@@ -1,8 +1,5 @@
-using System.Threading;
-using System.Threading.Tasks;
 using SolidApiExample.Application.Contracts;
 using SolidApiExample.Application.People.Shared;
-using SolidApiExample.Application.People;
 using SolidApiExample.Application.Repositories;
 using SolidApiExample.Application.Shared;
 

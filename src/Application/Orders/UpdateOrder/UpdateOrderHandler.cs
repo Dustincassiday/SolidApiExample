@@ -16,8 +16,7 @@ public sealed class UpdateOrder : IUpdate<Guid, UpdateOrderDto, OrderDto>
 
     public async Task<OrderDto> UpdateAsync(Guid id, UpdateOrderDto input, CancellationToken ct = default)
     {
-        var status = input.Status.ToOrderStatus();
-        var updated = await _repo.UpdateStatusAsync(id, status, ct);
+        var updated = await _repo.UpdateStatusAsync(id, input.Status.ToDomain(), ct);
         return updated.ToDto();
     }
 }

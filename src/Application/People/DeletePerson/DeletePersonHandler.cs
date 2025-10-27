@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using SolidApiExample.Application.Contracts;
 using SolidApiExample.Application.Repositories;
 

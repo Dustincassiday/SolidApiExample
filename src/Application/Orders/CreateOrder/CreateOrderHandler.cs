@@ -1,10 +1,7 @@
-using System.Threading;
-using System.Threading.Tasks;
 using SolidApiExample.Application.Contracts;
 using SolidApiExample.Application.Orders.Shared;
 using SolidApiExample.Application.Repositories;
 using SolidApiExample.Domain.Orders;
-using SolidApiExample.Application.Orders;
 
 namespace SolidApiExample.Application.Orders.CreateOrder;
 
@@ -16,8 +13,7 @@ public sealed class CreateOrder : ICreate<CreateOrderDto, OrderDto>
 
     public async Task<OrderDto> CreateAsync(CreateOrderDto input, CancellationToken ct = default)
     {
-        var status = input.Status.ToOrderStatus();
-        var order = Order.Create(input.PersonId, status);
+        var order = Order.Create(input.PersonId, input.Status.ToDomain());
         var created = await _repo.AddAsync(order, ct);
         return created.ToDto();
     }

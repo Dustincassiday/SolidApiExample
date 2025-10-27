@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SolidApiExample.Application.Contracts;
 using SolidApiExample.Application.Orders.CreateOrder;
@@ -7,6 +8,7 @@ using SolidApiExample.Application.Shared;
 
 namespace SolidApiExample.Api.Controllers;
 
+[Authorize]
 [ApiController, Route("api/orders")]
 public sealed class OrdersController : ControllerBase
 {
@@ -31,6 +33,7 @@ public sealed class OrdersController : ControllerBase
     [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<OrderDto>> Get(Guid id, CancellationToken ct)
     {
         var order = await _get.GetAsync(id, ct);
@@ -40,6 +43,7 @@ public sealed class OrdersController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(Paged<OrderDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<Paged<OrderDto>>> List([
         FromQuery] int page = 0,
         [FromQuery] int size = 20,
@@ -52,6 +56,7 @@ public sealed class OrdersController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(OrderDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<OrderDto>> Create(CreateOrderDto dto, CancellationToken ct)
     {
         var order = await _create.CreateAsync(dto, ct);
@@ -62,6 +67,7 @@ public sealed class OrdersController : ControllerBase
     [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<OrderDto>> Update(Guid id, UpdateOrderDto dto, CancellationToken ct)
     {
         var order = await _update.UpdateAsync(id, dto, ct);

@@ -1,3 +1,4 @@
+using SolidApiExample.Application.Orders;
 using SolidApiExample.Application.Orders.CreateOrder;
 using SolidApiExample.Application.Orders.GetOrder;
 using SolidApiExample.Application.Orders.ListOrders;
@@ -11,7 +12,7 @@ public sealed class OrdersValidatorsTests
     public void CreateOrderValidator_ReturnsFailure_WhenPersonIdIsEmpty()
     {
         var validator = new CreateOrderValidator();
-        var dto = new CreateOrderDto { PersonId = Guid.Empty, Status = "New" };
+        var dto = new CreateOrderDto { PersonId = Guid.Empty, Status = OrderStatusDto.Pending };
 
         var result = validator.Validate(dto);
 
@@ -20,10 +21,10 @@ public sealed class OrdersValidatorsTests
     }
 
     [Fact]
-    public void CreateOrderValidator_ReturnsFailure_WhenStatusMissing()
+    public void CreateOrderValidator_ReturnsFailure_WhenStatusInvalid()
     {
         var validator = new CreateOrderValidator();
-        var dto = new CreateOrderDto { PersonId = Guid.NewGuid(), Status = " " };
+        var dto = new CreateOrderDto { PersonId = Guid.NewGuid(), Status = (OrderStatusDto)999 };
 
         var result = validator.Validate(dto);
 
@@ -35,36 +36,36 @@ public sealed class OrdersValidatorsTests
     public void CreateOrderValidator_ReturnsSuccess_ForValidRequest()
     {
         var validator = new CreateOrderValidator();
-        var dto = new CreateOrderDto { PersonId = Guid.NewGuid(), Status = "Pending" };
+        var dto = new CreateOrderDto { PersonId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
 
         var result = validator.Validate(dto);
 
         Assert.True(result.IsValid);
         Assert.Empty(result.Errors);
-    }
-
-    [Fact]
-    public void UpdateOrderValidator_ReturnsFailure_WhenStatusMissing()
-    {
-        var validator = new UpdateOrderValidator();
-        var dto = new UpdateOrderDto { Status = "" };
-
-        var result = validator.Validate(dto);
-
-        Assert.False(result.IsValid);
-        Assert.Contains("Status must be provided.", result.Errors);
     }
 
     [Fact]
     public void UpdateOrderValidator_ReturnsSuccess_WhenStatusProvided()
     {
         var validator = new UpdateOrderValidator();
-        var dto = new UpdateOrderDto { Status = "Completed" };
+        var dto = new UpdateOrderDto { Status = OrderStatusDto.Completed };
 
         var result = validator.Validate(dto);
 
         Assert.True(result.IsValid);
         Assert.Empty(result.Errors);
+    }
+
+    [Fact]
+    public void UpdateOrderValidator_ReturnsFailure_WhenStatusInvalid()
+    {
+        var validator = new UpdateOrderValidator();
+        var dto = new UpdateOrderDto { Status = (OrderStatusDto)999 };
+
+        var result = validator.Validate(dto);
+
+        Assert.False(result.IsValid);
+        Assert.Contains("Status must be provided.", result.Errors);
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SolidApiExample.Application.Contracts;
 using SolidApiExample.Application.People.CreatePerson;
@@ -7,6 +8,7 @@ using SolidApiExample.Application.Shared;
 
 namespace SolidApiExample.Api.Controllers;
 
+[Authorize]
 [ApiController, Route("api/people")]
 public sealed class PeopleController : ControllerBase
 {
@@ -43,6 +45,7 @@ public sealed class PeopleController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(Paged<PersonDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<Paged<PersonDto>>> List([
         FromQuery] int page = 0,
         [FromQuery] int size = 20,
@@ -55,6 +58,7 @@ public sealed class PeopleController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(PersonDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PersonDto>> Create(CreatePersonDto dto, CancellationToken ct)
     {
         var person = await _create.CreateAsync(dto, ct);
@@ -65,6 +69,7 @@ public sealed class PeopleController : ControllerBase
     [ProducesResponseType(typeof(PersonDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PersonDto>> Update(Guid id, UpdatePersonDto dto, CancellationToken ct)
     {
         var person = await _update.UpdateAsync(id, dto, ct);
@@ -75,6 +80,7 @@ public sealed class PeopleController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         await _delete.DeleteAsync(id, ct);
