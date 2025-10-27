@@ -1,4 +1,4 @@
-name: Quality
+name: CI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main, dev]
 
 jobs:
-  quality:
+  main:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -74,15 +74,6 @@ jobs:
         env:
           PATH: $HOME/.dotnet/tools:$PATH
         run: dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN"
-      - name: Install Swashbuckle CLI
-        run: dotnet tool install --global Swashbuckle.AspNetCore.Cli
-
-      - name: Generate OpenAPI document
-        run: |
-          dotnet swagger tofile \
-            --output swagger/swagger.json \
-            src/Api/bin/Release/net9.0/SolidApiExample.Api.dll \
-            v1
       - name: Upload Coverage Artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -92,9 +83,3 @@ jobs:
             TestResults/coverage/coverage.cobertura.xml
             TestResults/coverage/report/SonarQube.xml
             **/TestResults/**/*.trx
-      - name: Upload OpenAPI Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: swagger
-          path: swagger/swagger.json
