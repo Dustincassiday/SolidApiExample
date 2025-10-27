@@ -91,9 +91,11 @@ public sealed class OrdersHandlersTests
         Assert.Equal(expected.Page, result.Page);
         Assert.Equal(expected.Size, result.Size);
         Assert.Single(result.Items);
-        Assert.Equal(ToDto(expected.Items.First().Status), result.Items.First().Status);
-        Assert.Equal(expected.Items.First().Total.Amount, result.Items.First().Total.Amount);
-        Assert.Equal(expected.Items.First().Total.Currency, result.Items.First().Total.Currency);
+        var expectedOrder = expected.Items[0];
+        var resultOrder = result.Items[0];
+        Assert.Equal(ToDto(expectedOrder.Status), resultOrder.Status);
+        Assert.Equal(expectedOrder.Total.Amount, resultOrder.Total.Amount);
+        Assert.Equal(expectedOrder.Total.Currency, resultOrder.Total.Currency);
         _repoMock.Verify(m => m.ListAsync(page, size, CancellationToken.None), Times.Once);
     }
 
