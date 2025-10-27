@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main, dev]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  SOLUTION: SolidApiExample.sln
+  TEST_RESULTS_DIR: TestResults
+  COVERAGE_DIR: TestResults/coverage
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.sln', '**/*.csproj', '**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore
+        run: dotnet restore "$SOLUTION"
+
+      - name: Install tools (SonarScanner + ReportGenerator)
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: SonarCloud - Begin Analysis
+        env:
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+        run: |
+          dotnet sonarscanner begin \
+            /k:"$SONAR_PROJECT_KEY" \
+            /o:"$SONAR_ORGANIZATION" \
+            /d:sonar.login="$SONAR_TOKEN" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.vstest.reportsPaths="$TEST_RESULTS_DIR/tests.trx" \
+            /d:sonar.coverageReportPaths="$COVERAGE_DIR/report/SonarQube.xml" \
+            /d:sonar.coverage.exclusions="**/bin/**,**/obj/**"
+
+      - name: Build
+        run: dotnet build "$SOLUTION" --configuration Release --no-restore
+
+      - name: Test + Coverage
+        run: |
+          mkdir -p "$COVERAGE_DIR"
+          dotnet test "$SOLUTION" \
+            --configuration Release \
+            --no-build \
+            --logger "trx;LogFileName=tests.trx" \
+            --results-directory "$TEST_RESULTS_DIR" \
+            /p:CollectCoverage=true \
+            /p:CoverletOutput="$COVERAGE_DIR/coverage" \
+            /p:CoverletOutputFormat=cobertura
+
+      - name: Convert Coverage to Sonar Format
+        run: |
+          reportgenerator \
+            -reports:"$COVERAGE_DIR/coverage.cobertura.xml" \
+            -targetdir:"$COVERAGE_DIR/report" \
+            -reporttypes:SonarQube
+
+      - name: SonarCloud - End Analysis
+        env:
+          PATH: $HOME/.dotnet/tools:$PATH
+        run: dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN"
+
+      - name: Upload Coverage Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            ${{ env.COVERAGE_DIR }}/coverage.cobertura.xml
+            ${{ env.COVERAGE_DIR }}/report/SonarQube.xml
+
+      - name: Upload TRX on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-trx
+          path: ${{ env.TEST_RESULTS_DIR }}/**/*.trx
