@@ -2,17 +2,16 @@ using SolidApiExample.Application.Validation;
 
 namespace SolidApiExample.Application.People.ListPeople;
 
-public sealed class ListPeopleValidator : IRequestValidator<(int page, int size)>
+public sealed class ListPeopleValidator : IRequestValidator<ListPeopleQuery>
 {
-    public ValidationResult Validate((int page, int size) request)
+    public ValidationResult Validate(ListPeopleQuery request)
     {
-        var (page, size) = request;
-        if (page < 0)
+        if (request.Page < 0)
         {
             return ValidationResult.Failure("Page must be zero or greater.");
         }
 
-        if (size <= 0)
+        if (request.Size <= 0)
         {
             return ValidationResult.Failure("Size must be greater than zero.");
         }

@@ -1,6 +1,5 @@
-using System;
+
 using SolidApiExample.Domain.People;
-using Xunit;
 
 namespace SolidApiExample.UnitTests.Domain.People;
 

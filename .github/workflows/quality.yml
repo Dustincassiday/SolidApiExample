@@ -15,7 +15,7 @@ jobs:
     env:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
-
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,12 +39,13 @@ jobs:
 
       - name: SonarCloud - Begin Analysis
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         run: |
           dotnet sonarscanner begin \
-            /k:"${{ secrets.SONAR_PROJECT_KEY }}" \
-            /o:"${{ secrets.SONAR_ORGANIZATION }}" \
-            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
+            /k:"$SONAR_PROJECT_KEY" \
+            /o:"$SONAR_ORGANIZATION" \
+            /d:sonar.login="$SONAR_TOKEN" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.vstest.reportsPaths="TestResults/tests.trx" \
             /d:sonar.coverageReportPaths="TestResults/coverage/report/SonarQube.xml" \
@@ -70,12 +71,9 @@ jobs:
             -reporttypes:SonarQube
 
       - name: SonarCloud - End Analysis
-        if: always()
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           PATH: $HOME/.dotnet/tools:$PATH
-        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
-
+        run: dotnet sonarscanner end /d:sonar.login="$SONAR_TOKEN"
       - name: Upload Coverage Artifacts
         if: always()
         uses: actions/upload-artifact@v4

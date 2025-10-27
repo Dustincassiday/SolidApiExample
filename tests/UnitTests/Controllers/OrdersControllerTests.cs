@@ -1,8 +1,11 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using SolidApiExample.Api.Controllers;
-using SolidApiExample.Application.Contracts;
+using SolidApiExample.Application.Orders;
 using SolidApiExample.Application.Orders.CreateOrder;
+using SolidApiExample.Application.Orders.GetOrder;
+using SolidApiExample.Application.Orders.ListOrders;
 using SolidApiExample.Application.Orders.Shared;
 using SolidApiExample.Application.Orders.UpdateOrder;
 using SolidApiExample.Application.Shared;
@@ -11,20 +14,17 @@ namespace SolidApiExample.UnitTests.Controllers;
 
 public sealed class OrdersControllerTests
 {
-    private readonly Mock<IGetById<Guid, OrderDto>> _getMock = new();
-    private readonly Mock<IListItems<OrderDto>> _listMock = new();
-    private readonly Mock<ICreate<CreateOrderDto, OrderDto>> _createMock = new();
-    private readonly Mock<IUpdate<Guid, UpdateOrderDto, OrderDto>> _updateMock = new();
+    private readonly Mock<IMediator> _mediatorMock = new();
 
     [Fact]
     public async Task Get_ReturnsOrder_FromHandler()
     {
         var orderId = Guid.NewGuid();
-        var expected = new OrderDto { Id = orderId, PersonId = Guid.NewGuid(), Status = "Pending" };
+        var expected = new OrderDto { Id = orderId, PersonId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
         var cancellation = CancellationToken.None;
 
-        _getMock
-            .Setup(m => m.GetAsync(orderId, cancellation))
+        _mediatorMock
+            .Setup(m => m.Send(It.Is<GetOrderQuery>(q => q.Id == orderId), cancellation))
             .ReturnsAsync(expected);
 
         var controller = CreateController();
@@ -33,7 +33,7 @@ public sealed class OrdersControllerTests
 
         var ok = Assert.IsType<OkObjectResult>(result.Result);
         Assert.Same(expected, ok.Value);
-        _getMock.Verify(m => m.GetAsync(orderId, cancellation), Times.Once);
+        _mediatorMock.Verify(m => m.Send(It.Is<GetOrderQuery>(q => q.Id == orderId), cancellation), Times.Once);
     }
 
     [Fact]
@@ -44,8 +44,8 @@ public sealed class OrdersControllerTests
         var cancellation = CancellationToken.None;
         var orders = new List<OrderDto>
         {
-            new() { Id = Guid.NewGuid(), PersonId = Guid.NewGuid(), Status = "Pending" },
-            new() { Id = Guid.NewGuid(), PersonId = Guid.NewGuid(), Status = "Shipped" }
+            new() { Id = Guid.NewGuid(), PersonId = Guid.NewGuid(), Status = OrderStatusDto.Pending },
+            new() { Id = Guid.NewGuid(), PersonId = Guid.NewGuid(), Status = OrderStatusDto.Completed }
         };
         var expected = new Paged<OrderDto>
         {
@@ -55,8 +55,8 @@ public sealed class OrdersControllerTests
             Total = 42
         };
 
-        _listMock
-            .Setup(m => m.ListAsync(page, size, cancellation))
+        _mediatorMock
+            .Setup(m => m.Send(It.Is<ListOrdersQuery>(q => q.Page == page && q.Size == size), cancellation))
             .ReturnsAsync(expected);
 
         var controller = CreateController();
@@ -65,18 +65,20 @@ public sealed class OrdersControllerTests
 
         var ok = Assert.IsType<OkObjectResult>(result.Result);
         Assert.Same(expected, ok.Value);
-        _listMock.Verify(m => m.ListAsync(page, size, cancellation), Times.Once);
+        _mediatorMock.Verify(
+            m => m.Send(It.Is<ListOrdersQuery>(q => q.Page == page && q.Size == size), cancellation),
+            Times.Once);
     }
 
     [Fact]
     public async Task Create_ForwardsRequest_ToHandler()
     {
-        var dto = new CreateOrderDto { PersonId = Guid.NewGuid(), Status = "Pending" };
+        var dto = new CreateOrderDto { PersonId = Guid.NewGuid(), Status = OrderStatusDto.Pending };
         var expected = new OrderDto { Id = Guid.NewGuid(), PersonId = dto.PersonId, Status = dto.Status };
         var cancellation = CancellationToken.None;
 
-        _createMock
-            .Setup(m => m.CreateAsync(dto, cancellation))
+        _mediatorMock
+            .Setup(m => m.Send(It.Is<CreateOrderCommand>(c => c.Dto == dto), cancellation))
             .ReturnsAsync(expected);
 
         var controller = CreateController();
@@ -87,19 +89,19 @@ public sealed class OrdersControllerTests
         Assert.Equal(nameof(OrdersController.Get), created.ActionName);
         Assert.Equal(expected.Id, ((dynamic)created.RouteValues!)?["id"]);
         Assert.Same(expected, created.Value);
-        _createMock.Verify(m => m.CreateAsync(dto, cancellation), Times.Once);
+        _mediatorMock.Verify(m => m.Send(It.Is<CreateOrderCommand>(c => c.Dto == dto), cancellation), Times.Once);
     }
 
     [Fact]
     public async Task Update_ForwardsRequest_ToHandler()
     {
         var orderId = Guid.NewGuid();
-        var dto = new UpdateOrderDto { Status = "Completed" };
+        var dto = new UpdateOrderDto { Status = OrderStatusDto.Completed };
         var expected = new OrderDto { Id = orderId, PersonId = Guid.NewGuid(), Status = dto.Status };
         var cancellation = CancellationToken.None;
 
-        _updateMock
-            .Setup(m => m.UpdateAsync(orderId, dto, cancellation))
+        _mediatorMock
+            .Setup(m => m.Send(It.Is<UpdateOrderCommand>(c => c.Id == orderId && c.Dto == dto), cancellation))
             .ReturnsAsync(expected);
 
         var controller = CreateController();
@@ -108,9 +110,10 @@ public sealed class OrdersControllerTests
 
         var ok = Assert.IsType<OkObjectResult>(result.Result);
         Assert.Same(expected, ok.Value);
-        _updateMock.Verify(m => m.UpdateAsync(orderId, dto, cancellation), Times.Once);
+        _mediatorMock.Verify(
+            m => m.Send(It.Is<UpdateOrderCommand>(c => c.Id == orderId && c.Dto == dto), cancellation),
+            Times.Once);
     }
 
-    private OrdersController CreateController() =>
-        new(_getMock.Object, _listMock.Object, _createMock.Object, _updateMock.Object);
+    private OrdersController CreateController() => new(_mediatorMock.Object);
 }

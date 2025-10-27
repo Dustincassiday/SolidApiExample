@@ -1,11 +1,13 @@
-
+using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using SolidApiExample.Api;
 using SolidApiExample.Application.Orders.Shared;
+using SolidApiExample.Application.Orders;
 using SolidApiExample.Application.People.Shared;
+using SolidApiExample.Api.Auth;
 
 namespace SolidApiExample.UnitTests.Api.Integration;
 
@@ -25,6 +27,7 @@ public sealed class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
             {
                 BaseAddress = new Uri("https://localhost")
             });
+        _client.DefaultRequestHeaders.Add(ApiKeyDefaults.HeaderName, "dev-api-key");
     }
 
     [Fact]
@@ -41,14 +44,14 @@ public sealed class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
         var created = await createResponse.Content.ReadFromJsonAsync<OrderDto>();
         Assert.NotNull(created);
         Assert.Equal(createPayload.PersonId, created!.PersonId);
-        Assert.Equal("Pending", created.Status);
+        Assert.Equal(OrderStatusDto.Pending, created.Status);
 
         var getResponse = await _client.GetAsync($"/api/orders/{created.Id}");
         getResponse.EnsureSuccessStatusCode();
         var fetched = await getResponse.Content.ReadFromJsonAsync<OrderDto>();
         Assert.NotNull(fetched);
         Assert.Equal(created.Id, fetched!.Id);
-        Assert.Equal("Pending", fetched.Status);
+        Assert.Equal(OrderStatusDto.Pending, fetched.Status);
     }
 
     [Fact]
@@ -73,5 +76,25 @@ public sealed class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.NotNull(fetched);
         Assert.Equal(created.Id, fetched!.Id);
         Assert.Equal("Ada Lovelace", fetched.Name);
+    }
+
+    [Fact]
+    public async Task MissingApiKey_ReturnsUnauthorized()
+    {
+        using var factory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureLogging(logging => logging.ClearProviders());
+                builder.UseSetting("https_port", "443");
+            });
+
+        var unauthenticatedClient = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var response = await unauthenticatedClient.GetAsync("/api/people");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 }

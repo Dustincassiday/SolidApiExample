@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using SolidApiExample.Application.Orders.Shared;
 using SolidApiExample.Application.Shared;
 using SolidApiExample.Application.Validation;
@@ -15,7 +12,7 @@ internal static class OrderMappings
         {
             Id = order.Id,
             PersonId = order.PersonId,
-            Status = order.Status.ToString()
+            Status = order.Status.ToDto()
         };
 
     public static Paged<OrderDto> ToDto(this Paged<Order> orders) =>
@@ -36,4 +33,22 @@ internal static class OrderMappings
 
         return status;
     }
+
+    public static OrderStatus ToDomain(this OrderStatusDto status) => status switch
+    {
+        OrderStatusDto.Pending => OrderStatus.Pending,
+        OrderStatusDto.Processing => OrderStatus.Processing,
+        OrderStatusDto.Completed => OrderStatus.Completed,
+        OrderStatusDto.Cancelled => OrderStatus.Cancelled,
+        _ => throw new ArgumentOutOfRangeException(nameof(status), status, null)
+    };
+
+    public static OrderStatusDto ToDto(this OrderStatus status) => status switch
+    {
+        OrderStatus.Pending => OrderStatusDto.Pending,
+        OrderStatus.Processing => OrderStatusDto.Processing,
+        OrderStatus.Completed => OrderStatusDto.Completed,
+        OrderStatus.Cancelled => OrderStatusDto.Cancelled,
+        _ => throw new ArgumentOutOfRangeException(nameof(status), status, null)
+    };
 }

@@ -1,9 +1,6 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using SolidApiExample.Infrastructure.Repositories.InMemory;
 using SolidApiExample.Domain.People;
-using Xunit;
+
 
 namespace SolidApiExample.UnitTests.Infrastructure.Repositories;
 

@@ -1,22 +1,22 @@
-using System.Threading;
-using System.Threading.Tasks;
-using SolidApiExample.Application.Contracts;
-using SolidApiExample.Application.People.Shared;
+using MediatR;
 using SolidApiExample.Application.People;
+using SolidApiExample.Application.People.Shared;
 using SolidApiExample.Application.Repositories;
 
 namespace SolidApiExample.Application.People.CreatePerson;
 
-public sealed class CreatePerson : ICreate<CreatePersonDto, PersonDto>
+public sealed record CreatePersonCommand(CreatePersonDto Dto) : IRequest<PersonDto>;
+
+public sealed class CreatePersonHandler : IRequestHandler<CreatePersonCommand, PersonDto>
 {
     private readonly IPeopleRepo _repo;
 
-    public CreatePerson(IPeopleRepo repo) => _repo = repo;
+    public CreatePersonHandler(IPeopleRepo repo) => _repo = repo;
 
-    public async Task<PersonDto> CreateAsync(CreatePersonDto input, CancellationToken ct = default)
+    public async Task<PersonDto> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
     {
-        var person = input.ToPerson();
-        var created = await _repo.AddAsync(person, ct);
+        var person = request.Dto.ToPerson();
+        var created = await _repo.AddAsync(person, cancellationToken);
         return created.ToDto();
     }
 }

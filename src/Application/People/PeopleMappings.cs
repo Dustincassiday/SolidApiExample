@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using SolidApiExample.Application.People.CreatePerson;
 using SolidApiExample.Application.People.Shared;
 using SolidApiExample.Application.Shared;

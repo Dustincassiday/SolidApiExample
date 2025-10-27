@@ -1,5 +1,3 @@
-using System;
-
 namespace SolidApiExample.Domain.People;
 
 public sealed class Person

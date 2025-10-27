@@ -1,19 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using MediatR;
 using Moq;
 using SolidApiExample.Application.People.CreatePerson;
 using SolidApiExample.Application.People.DeletePerson;
 using SolidApiExample.Application.People.GetPerson;
 using SolidApiExample.Application.People.ListPeople;
-using SolidApiExample.Application.People.Shared;
 using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Application.Repositories;
 using SolidApiExample.Application.Shared;
 using SolidApiExample.Domain.People;
-using Xunit;
 
 namespace SolidApiExample.UnitTests.Application.People;
 
@@ -31,9 +25,9 @@ public sealed class PeopleHandlersTests
             .Setup(m => m.FindAsync(personId, CancellationToken.None))
             .ReturnsAsync(expected);
 
-        var handler = new GetPerson(_repoMock.Object);
+        var handler = new GetPersonHandler(_repoMock.Object);
 
-        var result = await handler.GetAsync(personId, CancellationToken.None);
+        var result = await handler.Handle(new GetPersonQuery(personId), CancellationToken.None);
 
         Assert.Equal(expected.Id, result.Id);
         Assert.Equal(expected.Name, result.Name);
@@ -49,9 +43,10 @@ public sealed class PeopleHandlersTests
             .Setup(m => m.FindAsync(personId, CancellationToken.None))
             .ReturnsAsync((Person?)null);
 
-        var handler = new GetPerson(_repoMock.Object);
+        var handler = new GetPersonHandler(_repoMock.Object);
 
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => handler.GetAsync(personId, CancellationToken.None));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+            handler.Handle(new GetPersonQuery(personId), CancellationToken.None));
         _repoMock.Verify(m => m.FindAsync(personId, CancellationToken.None), Times.Once);
     }
 
@@ -75,9 +70,9 @@ public sealed class PeopleHandlersTests
             .Setup(m => m.ListAsync(page, size, CancellationToken.None))
             .ReturnsAsync(expected);
 
-        var handler = new ListPeople(_repoMock.Object);
+        var handler = new ListPeopleHandler(_repoMock.Object);
 
-        var result = await handler.ListAsync(page, size, CancellationToken.None);
+        var result = await handler.Handle(new ListPeopleQuery(page, size), CancellationToken.None);
 
         Assert.Equal(expected.Total, result.Total);
         Assert.Equal(expected.Page, result.Page);
@@ -95,9 +90,9 @@ public sealed class PeopleHandlersTests
             .Setup(m => m.AddAsync(It.IsAny<Person>(), CancellationToken.None))
             .ReturnsAsync((Person p, CancellationToken _) => Person.FromExisting(p.Id, p.Name));
 
-        var handler = new CreatePerson(_repoMock.Object);
+        var handler = new CreatePersonHandler(_repoMock.Object);
 
-        var result = await handler.CreateAsync(dto, CancellationToken.None);
+        var result = await handler.Handle(new CreatePersonCommand(dto), CancellationToken.None);
 
         Assert.Equal(dto.Name, result.Name);
         _repoMock.Verify(m => m.AddAsync(It.Is<Person>(p => p.Name == dto.Name), CancellationToken.None), Times.Once);
@@ -114,9 +109,9 @@ public sealed class PeopleHandlersTests
             .Setup(m => m.UpdateNameAsync(personId, dto.Name, CancellationToken.None))
             .ReturnsAsync(expected);
 
-        var handler = new UpdatePerson(_repoMock.Object);
+        var handler = new UpdatePersonHandler(_repoMock.Object);
 
-        var result = await handler.UpdateAsync(personId, dto, CancellationToken.None);
+        var result = await handler.Handle(new UpdatePersonCommand(personId, dto), CancellationToken.None);
 
         Assert.Equal(expected.Id, result.Id);
         Assert.Equal(expected.Name, result.Name);
@@ -132,10 +127,11 @@ public sealed class PeopleHandlersTests
             .Setup(m => m.DeleteAsync(personId, CancellationToken.None))
             .Returns(Task.CompletedTask);
 
-        var handler = new DeletePerson(_repoMock.Object);
+        var handler = new DeletePersonHandler(_repoMock.Object);
 
-        await handler.DeleteAsync(personId, CancellationToken.None);
+        var result = await handler.Handle(new DeletePersonCommand(personId), CancellationToken.None);
 
+        Assert.Equal(Unit.Value, result);
         _repoMock.Verify(m => m.DeleteAsync(personId, CancellationToken.None), Times.Once);
     }
 }

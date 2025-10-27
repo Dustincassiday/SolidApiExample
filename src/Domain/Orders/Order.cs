@@ -1,5 +1,3 @@
-using System;
-
 namespace SolidApiExample.Domain.Orders;
 
 public sealed class Order
