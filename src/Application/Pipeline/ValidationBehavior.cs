@@ -1,8 +1,10 @@
+using MediatR;
 using SolidApiExample.Application.Validation;
 
 namespace SolidApiExample.Application.Pipeline;
 
 public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : notnull
 {
     private readonly IEnumerable<IRequestValidator<TRequest>> _validators;
 
@@ -11,7 +13,10 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
         _validators = validators;
     }
 
-    public Task<TResponse> Handle(TRequest request, CancellationToken ct, Func<CancellationToken, Task<TResponse>> next)
+    public Task<TResponse> Handle(
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken)
     {
         var failures = _validators
             .Select(v => v.Validate(request))
@@ -24,6 +29,6 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
             throw new ValidationException(failures);
         }
 
-        return next(ct);
+        return next();
     }
 }

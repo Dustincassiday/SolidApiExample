@@ -16,7 +16,7 @@ public sealed class PeopleValidatorsTests
         var validator = new CreatePersonValidator();
         var dto = new CreatePersonDto { Name = " " };
 
-        var result = validator.Validate(dto);
+        var result = validator.Validate(new CreatePersonCommand(dto));
 
         Assert.False(result.IsValid);
         Assert.Contains("Name must be provided.", result.Errors);
@@ -28,7 +28,7 @@ public sealed class PeopleValidatorsTests
         var validator = new CreatePersonValidator();
         var dto = new CreatePersonDto { Name = "Ada Lovelace" };
 
-        var result = validator.Validate(dto);
+        var result = validator.Validate(new CreatePersonCommand(dto));
 
         Assert.True(result.IsValid);
         Assert.Empty(result.Errors);
@@ -40,7 +40,7 @@ public sealed class PeopleValidatorsTests
         var validator = new UpdatePersonValidator();
         var dto = new UpdatePersonDto { Name = "" };
 
-        var result = validator.Validate(dto);
+        var result = validator.Validate(new UpdatePersonCommand(Guid.NewGuid(), dto));
 
         Assert.False(result.IsValid);
         Assert.Contains("Name must be provided.", result.Errors);
@@ -52,7 +52,7 @@ public sealed class PeopleValidatorsTests
         var validator = new UpdatePersonValidator();
         var dto = new UpdatePersonDto { Name = "Grace Hopper" };
 
-        var result = validator.Validate(dto);
+        var result = validator.Validate(new UpdatePersonCommand(Guid.NewGuid(), dto));
 
         Assert.True(result.IsValid);
         Assert.Empty(result.Errors);
@@ -63,7 +63,7 @@ public sealed class PeopleValidatorsTests
     {
         var validator = new GetPersonValidator();
 
-        var result = validator.Validate(Guid.Empty);
+        var result = validator.Validate(new GetPersonQuery(Guid.Empty));
 
         Assert.False(result.IsValid);
         Assert.Contains("Id must be a non-empty GUID.", result.Errors);
@@ -74,7 +74,7 @@ public sealed class PeopleValidatorsTests
     {
         var validator = new GetPersonValidator();
 
-        var result = validator.Validate(Guid.NewGuid());
+        var result = validator.Validate(new GetPersonQuery(Guid.NewGuid()));
 
         Assert.True(result.IsValid);
         Assert.Empty(result.Errors);
@@ -85,7 +85,7 @@ public sealed class PeopleValidatorsTests
     {
         var validator = new DeletePersonValidator();
 
-        var result = validator.Validate(Guid.Empty);
+        var result = validator.Validate(new DeletePersonCommand(Guid.Empty));
 
         Assert.False(result.IsValid);
         Assert.Contains("Id must be a non-empty GUID.", result.Errors);
@@ -96,7 +96,7 @@ public sealed class PeopleValidatorsTests
     {
         var validator = new DeletePersonValidator();
 
-        var result = validator.Validate(Guid.NewGuid());
+        var result = validator.Validate(new DeletePersonCommand(Guid.NewGuid()));
 
         Assert.True(result.IsValid);
         Assert.Empty(result.Errors);
@@ -107,7 +107,7 @@ public sealed class PeopleValidatorsTests
     {
         var validator = new ListPeopleValidator();
 
-        var result = validator.Validate((-1, 5));
+        var result = validator.Validate(new ListPeopleQuery(-1, 5));
 
         Assert.False(result.IsValid);
         Assert.Contains("Page must be zero or greater.", result.Errors);
@@ -118,7 +118,7 @@ public sealed class PeopleValidatorsTests
     {
         var validator = new ListPeopleValidator();
 
-        var result = validator.Validate((0, 0));
+        var result = validator.Validate(new ListPeopleQuery(0, 0));
 
         Assert.False(result.IsValid);
         Assert.Contains("Size must be greater than zero.", result.Errors);
@@ -129,7 +129,7 @@ public sealed class PeopleValidatorsTests
     {
         var validator = new ListPeopleValidator();
 
-        var result = validator.Validate((2, 25));
+        var result = validator.Validate(new ListPeopleQuery(2, 25));
 
         Assert.True(result.IsValid);
         Assert.Empty(result.Errors);

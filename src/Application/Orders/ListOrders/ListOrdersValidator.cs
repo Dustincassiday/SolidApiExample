@@ -2,17 +2,16 @@ using SolidApiExample.Application.Validation;
 
 namespace SolidApiExample.Application.Orders.ListOrders;
 
-public sealed class ListOrdersValidator : IRequestValidator<(int page, int size)>
+public sealed class ListOrdersValidator : IRequestValidator<ListOrdersQuery>
 {
-    public ValidationResult Validate((int page, int size) request)
+    public ValidationResult Validate(ListOrdersQuery request)
     {
-        var (page, size) = request;
-        if (page < 0)
+        if (request.Page < 0)
         {
             return ValidationResult.Failure("Page must be zero or greater.");
         }
 
-        if (size <= 0)
+        if (request.Size <= 0)
         {
             return ValidationResult.Failure("Size must be greater than zero.");
         }

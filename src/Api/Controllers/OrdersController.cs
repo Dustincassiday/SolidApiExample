@@ -1,7 +1,9 @@
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SolidApiExample.Application.Contracts;
 using SolidApiExample.Application.Orders.CreateOrder;
+using SolidApiExample.Application.Orders.GetOrder;
+using SolidApiExample.Application.Orders.ListOrders;
 using SolidApiExample.Application.Orders.Shared;
 using SolidApiExample.Application.Orders.UpdateOrder;
 using SolidApiExample.Application.Shared;
@@ -12,22 +14,9 @@ namespace SolidApiExample.Api.Controllers;
 [ApiController, Route("api/orders")]
 public sealed class OrdersController : ControllerBase
 {
-    private readonly IGetById<Guid, OrderDto> _get;
-    private readonly IListItems<OrderDto> _list;
-    private readonly ICreate<CreateOrderDto, OrderDto> _create;
-    private readonly IUpdate<Guid, UpdateOrderDto, OrderDto> _update;
+    private readonly IMediator _mediator;
 
-    public OrdersController(
-        IGetById<Guid, OrderDto> get,
-        IListItems<OrderDto> list,
-        ICreate<CreateOrderDto, OrderDto> create,
-        IUpdate<Guid, UpdateOrderDto, OrderDto> update)
-    {
-        _get = get;
-        _list = list;
-        _create = create;
-        _update = update;
-    }
+    public OrdersController(IMediator mediator) => _mediator = mediator;
 
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
@@ -36,7 +25,7 @@ public sealed class OrdersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<OrderDto>> Get(Guid id, CancellationToken ct)
     {
-        var order = await _get.GetAsync(id, ct);
+        var order = await _mediator.Send(new GetOrderQuery(id), ct);
         return Ok(order);
     }
 
@@ -49,7 +38,7 @@ public sealed class OrdersController : ControllerBase
         [FromQuery] int size = 20,
         CancellationToken ct = default)
     {
-        var orders = await _list.ListAsync(page, size, ct);
+        var orders = await _mediator.Send(new ListOrdersQuery(page, size), ct);
         return Ok(orders);
     }
 
@@ -59,7 +48,7 @@ public sealed class OrdersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<OrderDto>> Create(CreateOrderDto dto, CancellationToken ct)
     {
-        var order = await _create.CreateAsync(dto, ct);
+        var order = await _mediator.Send(new CreateOrderCommand(dto), ct);
         return CreatedAtAction(nameof(Get), new { id = order.Id }, order);
     }
 
@@ -70,7 +59,7 @@ public sealed class OrdersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<OrderDto>> Update(Guid id, UpdateOrderDto dto, CancellationToken ct)
     {
-        var order = await _update.UpdateAsync(id, dto, ct);
+        var order = await _mediator.Send(new UpdateOrderCommand(id, dto), ct);
         return Ok(order);
     }
 }

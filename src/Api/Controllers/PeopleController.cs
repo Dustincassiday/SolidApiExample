@@ -1,10 +1,13 @@
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SolidApiExample.Application.Contracts;
 using SolidApiExample.Application.People.CreatePerson;
 using SolidApiExample.Application.People.Shared;
 using SolidApiExample.Application.People.UpdatePerson;
 using SolidApiExample.Application.Shared;
+using SolidApiExample.Application.People.DeletePerson;
+using SolidApiExample.Application.People.GetPerson;
+using SolidApiExample.Application.People.ListPeople;
 
 namespace SolidApiExample.Api.Controllers;
 
@@ -12,25 +15,9 @@ namespace SolidApiExample.Api.Controllers;
 [ApiController, Route("api/people")]
 public sealed class PeopleController : ControllerBase
 {
-    private readonly IGetById<Guid, PersonDto> _get;
-    private readonly IListItems<PersonDto> _list;
-    private readonly ICreate<CreatePersonDto, PersonDto> _create;
-    private readonly IUpdate<Guid, UpdatePersonDto, PersonDto> _update;
-    private readonly IDelete<Guid> _delete;
+    private readonly IMediator _mediator;
 
-    public PeopleController(
-        IGetById<Guid, PersonDto> get,
-        IListItems<PersonDto> list,
-        ICreate<CreatePersonDto, PersonDto> create,
-        IUpdate<Guid, UpdatePersonDto, PersonDto> update,
-        IDelete<Guid> delete)
-    {
-        _get = get;
-        _list = list;
-        _create = create;
-        _update = update;
-        _delete = delete;
-    }
+    public PeopleController(IMediator mediator) => _mediator = mediator;
 
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(PersonDto), StatusCodes.Status200OK)]
@@ -38,7 +25,7 @@ public sealed class PeopleController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PersonDto>> Get(Guid id, CancellationToken ct)
     {
-        var person = await _get.GetAsync(id, ct);
+        var person = await _mediator.Send(new GetPersonQuery(id), ct);
         return Ok(person);
     }
 
@@ -51,7 +38,7 @@ public sealed class PeopleController : ControllerBase
         [FromQuery] int size = 20,
         CancellationToken ct = default)
     {
-        var people = await _list.ListAsync(page, size, ct);
+        var people = await _mediator.Send(new ListPeopleQuery(page, size), ct);
         return Ok(people);
     }
 
@@ -61,7 +48,7 @@ public sealed class PeopleController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PersonDto>> Create(CreatePersonDto dto, CancellationToken ct)
     {
-        var person = await _create.CreateAsync(dto, ct);
+        var person = await _mediator.Send(new CreatePersonCommand(dto), ct);
         return CreatedAtAction(nameof(Get), new { id = person.Id }, person);
     }
 
@@ -72,7 +59,7 @@ public sealed class PeopleController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PersonDto>> Update(Guid id, UpdatePersonDto dto, CancellationToken ct)
     {
-        var person = await _update.UpdateAsync(id, dto, ct);
+        var person = await _mediator.Send(new UpdatePersonCommand(id, dto), ct);
         return Ok(person);
     }
 
@@ -83,7 +70,7 @@ public sealed class PeopleController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
-        await _delete.DeleteAsync(id, ct);
+        await _mediator.Send(new DeletePersonCommand(id), ct);
         return NoContent();
     }
 }

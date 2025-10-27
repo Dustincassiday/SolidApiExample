@@ -19,7 +19,7 @@ public sealed class PipelineBehaviorTests
         var expected = 42;
 
         // Act
-        var result = await behavior.Handle("request", CancellationToken.None, _ => Task.FromResult(expected));
+        var result = await behavior.Handle("request", () => Task.FromResult(expected), CancellationToken.None);
 
         // Assert
         Assert.Equal(expected, result);
@@ -39,7 +39,7 @@ public sealed class PipelineBehaviorTests
 
         // Act & Assert
         await Assert.ThrowsAsync<ValidationException>(() =>
-            behavior.Handle("request", CancellationToken.None, _ => Task.FromResult(0)));
+            behavior.Handle("request", () => Task.FromResult(0), CancellationToken.None));
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public sealed class PipelineBehaviorTests
         var expected = 7;
 
         // Act
-        var result = await behavior.Handle("request", CancellationToken.None, _ => Task.FromResult(expected));
+        var result = await behavior.Handle("request", () => Task.FromResult(expected), CancellationToken.None);
 
         // Assert
         Assert.Equal(expected, result);
