@@ -79,7 +79,8 @@ jobs:
             --logger "trx;LogFileName=tests.trx" \
             --results-directory "$TEST_RESULTS_DIR" \
             /p:CollectCoverage=true \
-            /p:CoverletOutput="$COVERAGE_DIR/coverage" \
+            /p:CoverletOutput="$COVERAGE_DIR/" \
+            /p:CoverletOutputName=coverage \
             /p:CoverletOutputFormat=cobertura
 
       - name: Convert Coverage to Sonar Format
