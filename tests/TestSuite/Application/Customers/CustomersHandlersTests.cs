@@ -80,8 +80,10 @@ public sealed class CustomersHandlersTests
         Assert.Equal(expected.Page, result.Page);
         Assert.Equal(expected.Size, result.Size);
         Assert.Single(result.Items);
-        Assert.Equal(expected.Items.First().Name, result.Items.First().Name);
-        Assert.Equal(expected.Items.First().Email.Value, result.Items.First().Email);
+        var expectedCustomer = expected.Items[0];
+        var resultCustomer = result.Items[0];
+        Assert.Equal(expectedCustomer.Name, resultCustomer.Name);
+        Assert.Equal(expectedCustomer.Email.Value, resultCustomer.Email);
         _repoMock.Verify(m => m.ListAsync(page, size, CancellationToken.None), Times.Once);
     }
 
